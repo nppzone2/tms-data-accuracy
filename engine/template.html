@@ -161,11 +161,11 @@ td.cok{color:var(--good);font-weight:600} td.cno{color:var(--crit);font-weight:7
     <div><div class="eyebrow">Operation Excellence · DIP</div>
     <h1>TMS Data Accuracy</h1>
     <p class="cap" id="lper"></p></div>
-    <div class="field"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" required></div>
+    <div class="field"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" placeholder="Mã NPP, ví dụ 10260142" required></div>
     <div class="field"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required></div>
     <p class="lerr" id="lerr" role="alert"></p>
     <button class="btn primary" type="submit">Đăng nhập</button>
-    <p class="lnote">Mỗi nhà phân phối đăng nhập bằng mã NPP và chỉ mở được dữ liệu của mình. Dữ liệu trên trang được mã hoá.</p>
+    <p class="lnote">Nhà phân phối đăng nhập bằng mã NPP (DisCode) và chỉ mở được dữ liệu của mình. Dữ liệu trên trang được mã hoá.</p>
   </form>
 </div>
 
@@ -194,7 +194,7 @@ const ENC = /*__ENC__*/;
    admin giải mã được toàn bộ, mỗi NPP chỉ giải mã được dữ liệu của mình. Sai mật khẩu thì không giải mã được. */
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function unlock(user,pass){
-  const blob=ENC.blobs[String(user||'').trim().toLowerCase()];
+  const u=String(user||'').trim().toLowerCase(), blob=ENC.blobs[u]||ENC.blobs[(ENC.alias||{})[u]];
   if(!blob) return null;
   try{
     const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(pass||'').trim()),'PBKDF2',false,['deriveKey']);

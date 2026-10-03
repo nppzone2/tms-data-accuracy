@@ -36,6 +36,7 @@ jobs:
       - name: Dựng trang đã mã hoá
         env:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          NPP_PASSWORD: ${{ secrets.NPP_PASSWORD }}
           NPP_PASSWORDS: ${{ secrets.NPP_PASSWORDS }}
         run: python engine/build_site.py
 

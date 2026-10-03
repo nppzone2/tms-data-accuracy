@@ -18,9 +18,8 @@ Nếu repo để công khai (Public), sau khi dựng xong workflow sẽ tự xo�
 
 1. **Đặt mật khẩu** — Settings → Secrets and variables → Actions → New repository secret:
    - `ADMIN_PASSWORD`: mật khẩu tài khoản `admin` (xem tất cả NPP).
-   - `NPP_PASSWORDS`: mật khẩu từng NPP, dạng JSON, ví dụ
-     `{"HM":"...","HM12":"...","P69":"...","P444":"...","P449":"...","P450":"...","P461":"...","P467":"...","P468":"..."}`
-     NPP nào không khai báo thì dùng DisCode làm mật khẩu (không khuyến khích vì dễ đoán).
+   - `NPP_PASSWORD`: mật khẩu chung cho tất cả NPP, ví dụ `User@123`.
+   - (Tuỳ chọn) `NPP_PASSWORDS`: mật khẩu riêng cho từng NPP, dạng JSON `{"P444":"...","P461":"..."}`. NPP có trong đây dùng mật khẩu riêng, còn lại dùng mật khẩu chung.
 2. **Bật trang web** — Settings → Pages → Build and deployment → Source: chọn **GitHub Actions**.
 3. Tải 2 file dữ liệu vào `input/` như trên. Link trang hiện ở Settings → Pages, dạng `https://<tài-khoản>.github.io/tms-data-accuracy/`.
 
@@ -28,7 +27,7 @@ Nếu repo để công khai (Public), sau khi dựng xong workflow sẽ tự xo�
 
 ## Bảo mật
 
-Dữ liệu trên trang được mã hoá (AES-GCM, khoá dẫn xuất PBKDF2-SHA256 từ mật khẩu). Admin mở được toàn bộ; mỗi NPP chỉ mở được dữ liệu của mình. Xem mã nguồn trang cũng không đọc được số liệu. Mật khẩu không nằm trong repo.
+Dữ liệu trên trang được mã hoá (AES-GCM, khoá dẫn xuất PBKDF2-SHA256 từ mật khẩu). Admin mở được toàn bộ; mỗi NPP chỉ mở được dữ liệu của mình. Nếu dùng mật khẩu chung, NPP nào biết mã của NPP khác thì mở được dữ liệu NPP đó — muốn tách hẳn thì đặt `NPP_PASSWORDS`. Xem mã nguồn trang cũng không đọc được số liệu. Mật khẩu không nằm trong repo.
 
 Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lịch sử commit dù đã bị xoá khỏi thư mục. Muốn kín hoàn toàn, chuyển repo sang **Private** (GitHub Pages cho repo Private cần gói GitHub Pro/Team).
 
@@ -37,7 +36,7 @@ Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lị
 | Tài khoản | Tên đăng nhập | Thấy gì |
 |---|---|---|
 | Admin | `admin` | Tất cả NPP, thêm tab Chất lượng dữ liệu |
-| NPP | mã NPP, ví dụ `P467` | Chỉ dữ liệu của NPP đó |
+| NPP | mã NPP (DisCode), ví dụ `10349819`; gõ tên NPP như `P467` cũng được | Chỉ dữ liệu của NPP đó |
 
 ## Cách chấm
 

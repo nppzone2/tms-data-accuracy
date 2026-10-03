@@ -1,9 +1,11 @@
 """Dựng trang dashboard đã mã hoá từ build/data.json -> docs/index.html.
 
+Đăng nhập NPP: tên đăng nhập là mã NPP (DisCode trong file Fill Rate, ví dụ 10260142);
+gõ tên NPP (ví dụ P444) cũng được.
 Mật khẩu lấy từ biến môi trường (GitHub Secrets):
   ADMIN_PASSWORD  mật khẩu tài khoản admin (xem toàn bộ NPP)
-  NPP_PASSWORDS   JSON {"HM": "matkhau", "HM12": "matkhau", ...}
-NPP nào không có trong NPP_PASSWORDS thì dùng DisCode (mã NPP trong file Fill Rate) làm mật khẩu.
+  NPP_PASSWORD    mật khẩu chung cho mọi NPP
+  NPP_PASSWORDS   (tuỳ chọn) JSON {"P444": "matkhau", ...} để đặt mật khẩu riêng cho từng NPP
 """
 import base64, gzip, json, os, sys
 from pathlib import Path
@@ -19,14 +21,16 @@ auth = data.pop('auth')   # mật khẩu mặc định (DisCode) — không bao 
 
 admin_pw = os.environ.get('ADMIN_PASSWORD', '').strip()
 npp_pw = json.loads(os.environ.get('NPP_PASSWORDS', '') or '{}')
+common_pw = os.environ.get('NPP_PASSWORD', '').strip()
 warn = []
 if not admin_pw:
     sys.exit('LỖI: chưa đặt secret ADMIN_PASSWORD. Vào Settings → Secrets and variables → Actions để thêm.')
 for n in data['npps']:
     if not str(npp_pw.get(n, '')).strip():
-        npp_pw[n] = auth[n]; warn.append(n)
+        if common_pw: npp_pw[n] = common_pw
+        else: npp_pw[n] = auth[n]; warn.append(n)
 if warn:
-    print('Cảnh báo: dùng DisCode làm mật khẩu cho', ', '.join(warn), '— nên đặt NPP_PASSWORDS.')
+    print('Cảnh báo: chưa đặt NPP_PASSWORD, dùng DisCode làm mật khẩu cho', ', '.join(warn))
 
 def b64(b): return base64.b64encode(b).decode()
 
@@ -54,9 +58,10 @@ def slice_for(n):
 
 blobs = {'admin': seal(dict(data, __role='admin'), admin_pw)}
 for n in data['npps']:
-    blobs[n.lower()] = seal(dict(slice_for(n), __role=n), npp_pw[n])
+    blobs[auth[n]] = seal(dict(slice_for(n), __role=n), npp_pw[n])
+alias = {n.lower(): auth[n] for n in data['npps']}   # gõ tên NPP cũng mở được
 
-enc = dict(iter=ITER, period=data['meta']['period'], built=data['meta']['built'], blobs=blobs)
+enc = dict(iter=ITER, period=data['meta']['period'], built=data['meta']['built'], blobs=blobs, alias=alias)
 tpl = (ROOT / 'engine' / 'template.html').read_text(encoding='utf-8')
 page = tpl.replace('/*__ENC__*/', json.dumps(enc).replace('</', '<\\/'))
 head = ('<!doctype html><html lang="vi"><head><meta charset="utf-8">'
