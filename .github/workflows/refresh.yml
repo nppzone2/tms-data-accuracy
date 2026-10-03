@@ -1,0 +1,68 @@
+name: Cập nhật dashboard
+
+# Chạy khi có file mới trong input/, hoặc bấm "Run workflow" trong tab Actions.
+on:
+  push:
+    branches: [main]
+    paths: ['input/**.xlsx']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refresh-dashboard
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Cài thư viện
+        run: pip install -r requirements.txt
+
+      - name: Tính KPI từ 2 file trong input/
+        run: python engine/compute.py
+
+      - name: Dựng trang đã mã hoá
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          NPP_PASSWORDS: ${{ secrets.NPP_PASSWORDS }}
+        run: python engine/build_site.py
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      # Repo công khai: xoá file Excel thô khỏi thư mục input/ sau khi đã dựng xong,
+      # để người ngoài không tải được dữ liệu gốc từ trang repo.
+      - name: Xoá file dữ liệu thô (repo công khai)
+        if: ${{ !github.event.repository.private }}
+        run: |
+          git config user.name "TMS Dashboard Bot"
+          git config user.email "actions@github.com"
+          git rm -q --ignore-unmatch input/*.xlsx
+          if ! git diff --cached --quiet; then
+            git commit -m "Xoá file dữ liệu thô sau khi cập nhật dashboard [skip ci]"
+            git push
+          fi
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

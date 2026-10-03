@@ -1,0 +1,5 @@
+build/
+docs/
+__pycache__/
+*.pyc
+~$*
