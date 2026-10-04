@@ -7,7 +7,8 @@
   python engine/run.py save      mã hoá lại các tháng vừa thay vào input/vault/<YYYY-MM>.enc
 
 Mỗi tháng tải 2 file (TMS Order Detail + Fill Rate) của tháng đó. Tải lại giữa tháng thì dữ liệu tháng đó
-được thay bằng file mới. Kho giữ mọi tháng; trang hiển thị MONTHS_SHOWN tháng gần nhất.
+được thay bằng file mới. Kho giữ mọi tháng; trang hiển thị tháng hiện tại (đang chạy) và
+N tháng đã hoàn thành gần nhất (completed_months_shown trong engine/config.json, mặc định 3).
 Khoá mã hoá dẫn xuất từ secret ADMIN_PASSWORD.
 """
 import io, json, os, re, shutil, subprocess, sys, zipfile
@@ -19,7 +20,9 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUT, VAULT, WORK, BUILD = ROOT / 'input', ROOT / 'input' / 'vault', ROOT / 'work', ROOT / 'build' / 'months'
-MONTHS_SHOWN = int(os.environ.get('MONTHS_SHOWN', '3'))
+from datetime import datetime, timedelta, timezone
+CFG = json.load(open(ROOT / 'engine' / 'config.json', encoding='utf-8'))
+DONE_SHOWN = int(CFG.get('completed_months_shown', 3))
 CHANGED = ROOT / 'work' / '.changed'
 
 pw = os.environ.get('ADMIN_PASSWORD', '').strip()
@@ -85,8 +88,13 @@ def prepare():
     months = sorted(p.name for p in WORK.iterdir() if p.is_dir() and re.fullmatch(r'\d{4}-\d{2}', p.name))
     if not months:
         sys.exit('LỖI: chưa có dữ liệu. Hãy tải 2 file TMS Order Detail và Fill Rate vào input/.')
-    shown = months[-MONTHS_SHOWN:]
-    print('Có dữ liệu các tháng:', ', '.join(months), '· hiển thị:', ', '.join(shown))
+    cur = (datetime.now(timezone.utc) + timedelta(hours=7)).strftime('%Y-%m')   # tháng hiện tại (giờ Việt Nam)
+    done = [m for m in months if m < cur][-DONE_SHOWN:]
+    live = [m for m in months if m >= cur][-1:]
+    shown = done + live
+    (ROOT / 'build').mkdir(exist_ok=True)
+    (ROOT / 'build' / 'months_meta.json').write_text(json.dumps(dict(shown=shown, completed=done, current=live[0] if live else None)))
+    print('Có dữ liệu các tháng:', ', '.join(months), '· hoàn thành hiển thị:', ', '.join(done) or '—', '· đang chạy:', ', '.join(live) or '—')
     # 3. tính KPI từng tháng
     for m in shown:
         r = subprocess.run([sys.executable, str(ROOT / 'engine' / 'compute.py'), str(WORK / m), str(BUILD / f'{m}.json')])

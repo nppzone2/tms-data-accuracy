@@ -32,6 +32,17 @@ t = pd.read_excel(TMS_F, header=2)
 f = pd.read_excel(FR_F, header=2)
 t['OrderNumber'] = t.OrderNumber.astype(str).str.strip()
 f['DocNo'] = f.DocNo.astype(str).str.strip()
+# ---------- loại trừ khoảng ngày theo engine/config.json ----------
+CFG = json.load(open(ROOT / 'engine' / 'config.json', encoding='utf-8'))
+EXCL = []
+for x in CFG.get('exclude_dates', []):
+    a, b = pd.Timestamp(x['from']), pd.Timestamp(x['to'])
+    hit = t.Date.between(a, b + pd.Timedelta(hours=23, minutes=59, seconds=59))
+    if hit.any():
+        EXCL.append(dict(start=a.strftime('%d/%m/%Y'), end=b.strftime('%d/%m/%Y'), note=x.get('note', ''),
+                         orders=int(hit.sum()), plans=int(t.loc[hit, 'PlanNumber'].nunique())))
+        t = t[~hit].copy()
+        print(f'Loại trừ {EXCL[-1]["start"]}–{EXCL[-1]["end"]}: {EXCL[-1]["orders"]:,} đơn, {EXCL[-1]["plans"]:,} chuyến')
 n_file = len(t)
 dup = int(t.OrderNumber.duplicated().sum())
 
@@ -385,7 +396,7 @@ DATA = dict(
     meta=dict(period=f'{m.Date.min():%d/%m/%Y} – {m.Date.max():%d/%m/%Y}', orders=n_file, plans=len(pl),
               npps=len(NPPS), bu=m.BU.iloc[0], regions=sorted(m.Region.unique().tolist()),
               src='TMS_Order_Detail.xlsx + Fill_Rate.xlsx', built=(datetime.utcnow()+pd.Timedelta(hours=7)).strftime('%d/%m/%Y %H:%M'),
-              days=int(m.Date.dt.normalize().nunique())),
+              days=int(m.Date.dt.normalize().nunique()), excluded=EXCL),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
     dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, dq=dq, sens=sens)

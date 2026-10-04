@@ -10,7 +10,9 @@ Dashboard KPI Data Accuracy của các nhà phân phối (NPP), tự cập nhậ
    - file Fill Rate (tên có chữ `Fill`)
 3. Bấm **Commit changes**.
 
-Workflow tự nhận tháng từ cột `Date` của file TMS. Tải lại trong tháng thì dữ liệu tháng đó được thay bằng file mới; sang tháng mới thì tháng cũ được giữ lại. Trang hiển thị **3 tháng gần nhất**, có ô chọn tháng ở thanh tiêu đề và tab **3 tháng** để so sánh đạt / rớt từng tiêu chí.
+Workflow tự nhận tháng từ cột `Date` của file TMS. Trang hiển thị **3 tháng đã hoàn thành gần nhất và tháng đang chạy** (ô chọn tháng ghi "đang chạy"); tab **3 tháng** chỉ tổng hợp các tháng đã hoàn thành. Trang tự dựng lại lúc 00:30 mỗi ngày để chuyển tháng đúng hạn.
+
+**Loại trừ ngày:** khai báo trong `engine/config.json` (`exclude_dates`). Đơn có `Date` trong khoảng này bị loại khỏi toàn bộ KPI. Hiện đang loại trừ 16/09–23/09/2026. Sửa file này trên GitHub rồi Commit, trang tự dựng lại. Tải lại trong tháng thì dữ liệu tháng đó được thay bằng file mới; sang tháng mới thì tháng cũ được giữ lại. Trang hiển thị **3 tháng gần nhất**, có ô chọn tháng ở thanh tiêu đề và tab **3 tháng** để so sánh đạt / rớt từng tiêu chí.
 
 Mỗi lần chỉ tải 2 file của một tháng. Muốn nạp nhiều tháng, tải lần lượt từng tháng và đợi lần trước chạy xong (dấu ✓ xanh ở tab **Actions**, khoảng 2–3 phút).
 

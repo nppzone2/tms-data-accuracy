@@ -20,8 +20,11 @@ ITER = 200_000
 files = sorted((ROOT / 'build' / 'months').glob('*.json'))
 if not files:
     sys.exit('LỖI: chưa có dữ liệu tháng nào trong build/months/. Chạy engine/run.py prepare trước.')
-MONTHS = {f.stem: json.load(open(f, encoding='utf-8')) for f in files}
+MM = json.load(open(ROOT / 'build' / 'months_meta.json')) if (ROOT / 'build' / 'months_meta.json').exists() else {}
+MONTHS = {f.stem: json.load(open(f, encoding='utf-8')) for f in files if not MM or f.stem in MM['shown']}
 ORDER = sorted(MONTHS)
+DONE = [m for m in MM.get('completed', ORDER) if m in MONTHS]   # tháng đã hoàn thành
+CUR = MM.get('current')
 auth = {}
 for d in MONTHS.values():
     auth.update(d.pop('auth'))       # mật khẩu mặc định (DisCode) — không bao giờ đưa vào trang
@@ -64,10 +67,10 @@ def slice_for(data, n):
     d['meta'] = dict(data['meta'], npps=1)
     return d
 
-blobs = {'admin': seal(dict(__role='admin', order=ORDER, months=MONTHS), admin_pw)}
+blobs = {'admin': seal(dict(__role='admin', order=ORDER, completed=DONE, current=CUR, months=MONTHS), admin_pw)}
 for n in NPPS:
     mine = {m: slice_for(d, n) for m, d in MONTHS.items() if n in d['npps']}
-    blobs[auth[n]] = seal(dict(__role=n, order=sorted(mine), months=mine), npp_pw[n])
+    blobs[auth[n]] = seal(dict(__role=n, order=sorted(mine), completed=[m for m in DONE if m in mine], current=CUR if CUR in mine else None, months=mine), npp_pw[n])
 alias = {n.lower(): auth[n] for n in NPPS}   # gõ tên NPP cũng mở được
 
 last = MONTHS[ORDER[-1]]['meta']

@@ -278,7 +278,8 @@ document.getElementById('lu').focus();
 function startApp(BUNDLE, LOGIN_ROLE){
 const $=s=>document.querySelector(s);
 /* Gói dữ liệu gồm nhiều tháng; DATA là tháng đang chọn. */
-const ORDER=BUNDLE.order, ml=m=>`T${+m.slice(5)}/${m.slice(0,4)}`;
+const ORDER=BUNDLE.order, DONE=(BUNDLE.completed||ORDER).filter(m=>ORDER.includes(m)), CUR=BUNDLE.current||null, ml=m=>`T${+m.slice(5)}/${m.slice(0,4)}`;
+const exclTxt=d=>(d.meta.excluded||[]).map(x=>`${x.start.slice(0,5)}–${x.end}`).join(', ');
 let month=ORDER[ORDER.length-1], DATA, TH, NPPS, EK, ERR, SC;
 function loadMonth(m){
   month=m; DATA=BUNDLE.months[m]; TH=DATA.thresholds; NPPS=DATA.npps; EK=DATA.err_keys;
@@ -400,6 +401,12 @@ function todoList(s){
   return `<ul class="todo">${g.map(x=>`<li><span class="tn">${fmt(x[0])}<small>${x[1]}</small></span><span>${esc(x[2])}</span></li>`).join('')}</ul>`;
 }
 
+function notes(){
+  let n='';
+  if(month===CUR) n+=`<span class="chip warn">Tháng đang chạy · số liệu tạm tính</span> `;
+  (DATA.meta.excluded||[]).forEach(x=>{n+=`<span class="chip na">Loại trừ ${esc(x.start.slice(0,5))}–${esc(x.end)} · ${fmt(x.orders)} đơn${x.note?' · '+esc(x.note):''}</span> `;});
+  return n?`<div style="display:flex;flex-wrap:wrap;gap:6px">${n}</div>`:'';
+}
 /* ---------------- Tổng quan ---------------- */
 function pOverview(){
   const s=curS(), all=scope==='ALL';
@@ -409,13 +416,13 @@ function pOverview(){
     h+=`<section class="card"><div class="hero">${ring(np,NPPS.length)}
       <div style="display:grid;gap:6px;min-width:0"><div class="lbl">Data Accuracy · ${esc(DATA.meta.period)}</div>
       <h2>${np} trên ${NPPS.length} NPP đạt kết quả tháng</h2>
-      <p class="sub">${fmt(DATA.meta.orders)} đơn · ${fmt(DATA.meta.plans)} chuyến. Đạt khi qua cả 4 tiêu chí.</p>
+      <p class="sub">${fmt(DATA.meta.orders)} đơn · ${fmt(DATA.meta.plans)} chuyến. Đạt khi qua cả 4 tiêu chí.</p>${notes()}
       <div class="npps">${DATA.scorecard.map(x=>`<button type="button" class="npill ${x.overall==='PASS'?'ok':'no'}" data-npp="${x.npp}"><b>${x.npp}</b><span>${x.overall==='PASS'?'✓ Đạt':'✕ Trượt '+x.n_fail}</span></button>`).join('')}</div></div></div></section>`;
   } else {
     const inf=DATA.npp_info[scope], ok=s.overall==='PASS';
     h+=`<section class="card"><div class="hero"><div class="verdict ${ok?'':''}" style="color:${ok?'var(--good)':'var(--crit)'}">${ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT'}</div>
       <div style="display:grid;gap:4px;min-width:0"><div class="lbl">NPP ${esc(scope)} · ${esc(DATA.meta.period)}</div><h2>${esc(inf.name)}</h2>
-      <p class="sub">${esc(inf.area)} · ${fmt(s.orders)} đơn · ${fmt(s.plans)} chuyến${s.n_fail?` · trượt ${s.n_fail}/4 tiêu chí`:''}</p></div></div></section>`;
+      <p class="sub">${esc(inf.area)} · ${fmt(s.orders)} đơn · ${fmt(s.plans)} chuyến${s.n_fail?` · trượt ${s.n_fail}/4 tiêu chí`:''}</p>${notes()}</div></div></section>`;
   }
   h+=`<section class="card"><div class="ch"><div><h2>4 tiêu chí xét kết quả</h2><p class="sub">Trượt 1 tiêu chí là không đạt tháng.</p></div></div><div class="kpis">${DA.map(c=>tile(c,s,all,false)).join('')}</div></section>`;
   h+=`<div class="grid2"><section class="card"><div><h2>Năng lực giao hàng</h2><p class="sub">Đánh giá năng lực giao hàng, không tính là lỗi.</p></div><div class="kpis">${CAP.map(c=>tile(c,s,all,'cap')).join('')}</div></section>
@@ -606,6 +613,7 @@ function pLogic(){
   h+=`<section class="card"><div><h2>Chỉ số theo dõi</h2><p class="sub">Giúp NPP cải thiện, không tính vào kết quả.</p></div><div class="rules">${T.map(r=>`<article class="rule trk"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
   h+=`<section class="card"><h2>Lưu ý</h2><div class="rules">
     <article class="rule"><h3>Mức cho phép</h3><p>Số chuyến lỗi tối đa vẫn đạt = số lớn nhất còn dưới ${T_DT}% tổng chuyến. Ví dụ 400 chuyến: tối đa 19.</p></article>
+    <article class="rule"><h3>Loại trừ ngày</h3><p>${ORDER.flatMap(m=>BUNDLE.months[m].meta.excluded||[]).map(x=>`${esc(x.start)}–${esc(x.end)}: loại khỏi toàn bộ KPI (${fmt(x.orders)} đơn, ${fmt(x.plans)} chuyến).`).join(' ')||'Không có khoảng ngày nào bị loại trừ.'}</p></article>
     <article class="rule"><h3>Khoảng cách outlet</h3><p>Tính từ toạ độ <code>lat_to/long_to</code> của 2 outlet liên tiếp trong chuyến.</p></article>
     <article class="rule"><h3>Phản hồi số liệu</h3><p>Tab Đơn lỗi → lọc → Tải Excel → đánh dấu đơn cần xem lại → gửi quản lý vùng.</p></article></div></section>`;
   return h;
@@ -625,11 +633,12 @@ const MC=[  // tiêu chí: khoá verdict, cách hiện giá trị, true = càng 
 const rowOf=(m,n)=>{const d=BUNDLE.months[m];return n==='ALL'?d.total:d.scorecard.find(s=>s.npp===n);};
 const nppsAll=()=>[...new Set(ORDER.flatMap(m=>BUNDLE.months[m].npps))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
 function pMonths(){
-  const all=scope==='ALL', ms=ORDER;
-  let h=`<section class="card"><div class="ch"><div><h2>Kết quả ${ms.length} tháng</h2><p class="sub">${all?'Số NPP đạt Data Accuracy mỗi tháng.':'Kết quả Data Accuracy của NPP '+esc(scope)+' mỗi tháng.'} Bấm một tháng để xem chi tiết.</p></div></div><div class="mcards">${
+  const all=scope==='ALL', ms=DONE;
+  if(!ms.length) return sec('Chưa có tháng hoàn thành','Trang này tổng hợp các tháng đã kết thúc. Tháng đang chạy xem ở tab Tổng quan.','');
+  let h=`<section class="card"><div class="ch"><div><h2>Kết quả ${ms.length} tháng đã hoàn thành</h2><p class="sub">${all?'Số NPP đạt Data Accuracy mỗi tháng.':'Kết quả Data Accuracy của NPP '+esc(scope)+' mỗi tháng.'} Không gồm tháng đang chạy. Bấm một tháng để xem chi tiết.</p></div></div><div class="mcards">${
     ms.map(m=>{const d=BUNDLE.months[m];
       if(all){const np=d.scorecard.filter(x=>x.overall==='PASS').length;
-        return `<button type="button" class="mcard ${m===month?'cur':''}" data-month="${m}">${ring(np,d.npps.length)}<div><div class="lbl">${ml(m)}</div><div class="big">${np}/${d.npps.length} NPP đạt</div><div class="sub">${fmt(d.meta.orders)} đơn · ${fmt(d.meta.plans)} chuyến</div></div></button>`;}
+        return `<button type="button" class="mcard ${m===month?'cur':''}" data-month="${m}">${ring(np,d.npps.length)}<div><div class="lbl">${ml(m)}</div><div class="big">${np}/${d.npps.length} NPP đạt</div><div class="sub">${fmt(d.meta.orders)} đơn · ${fmt(d.meta.plans)} chuyến${exclTxt(d)?' · loại trừ '+exclTxt(d):''}</div></div></button>`;}
       const r=rowOf(m,scope);
       if(!r) return `<div class="mcard"><div class="big" style="color:var(--muted)">—</div><div><div class="lbl">${ml(m)}</div><div class="sub">Không có dữ liệu</div></div></div>`;
       const ok=r.overall==='PASS';
@@ -697,14 +706,14 @@ function pDq(){
 }
 
 /* ---------------- điều hướng ---------------- */
-const PAGES=[['overview','Tổng quan',pOverview],['months',`${ORDER.length} tháng`,pMonths],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng',pTrend],['errors','Đơn lỗi',pErrors],['logic','Cách tính',pLogic],['dq','Data Quality',pDq]];
+const PAGES=[['overview','Tổng quan',pOverview],['months',`${DONE.length||3} tháng`,pMonths],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng',pTrend],['errors','Đơn lỗi',pErrors],['logic','Cách tính',pLogic],['dq','Data Quality',pDq]];
 function buildTabs(){
   $('#tabs').innerHTML=PAGES.filter(p=>p[0]!=='dq'||isAdmin()).map(p=>`<button type="button" role="tab" data-p="${p[0]}" aria-selected="${p[0]===page}" class="${p[0]===page?'on':''}">${p[1]}</button>`).join('');
 }
 function render(){
   buildTabs();
   const inf=scope==='ALL'?null:DATA.npp_info[scope];
-  $('#hmeta').textContent=`${scope==='ALL'?DATA.meta.bu+' · '+NPPS.length+' NPP':'NPP '+scope+' · '+inf.area} · ${page==='months'?ORDER.map(ml).join(', '):DATA.meta.period}`;
+  $('#hmeta').textContent=`${scope==='ALL'?DATA.meta.bu+' · '+NPPS.length+' NPP':'NPP '+scope+' · '+inf.area} · ${page==='months'?DONE.map(ml).join(', '):DATA.meta.period}`;
   $('#month').disabled=page==='months';
   $('#main').innerHTML=PAGES.find(p=>p[0]===page)[2]();
   try{ if(location.hash!=='#'+page) history.replaceState(null,'','#'+page);}catch(_){}
@@ -746,7 +755,7 @@ function fillScope(){
   $('#scope').innerHTML=`<option value="ALL">Tất cả NPP</option>`+NPPS.map(n=>`<option value="${n}">NPP ${n}</option>`).join('');
   $('#scope').value=scope;
 }
-$('#month').innerHTML=ORDER.slice().reverse().map(m=>`<option value="${m}">${ml(m)}</option>`).join('');
+$('#month').innerHTML=ORDER.slice().reverse().map(m=>`<option value="${m}">${ml(m)}${m===CUR?' · đang chạy':''}</option>`).join('');
 $('#month').value=month;
 $('#month').addEventListener('change',e=>{loadMonth(e.target.value);fillScope();EF.day='';epage=1;render();});
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600);}
