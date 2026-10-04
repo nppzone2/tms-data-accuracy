@@ -124,7 +124,9 @@ m['wh_fail'] = dlv.notna() & ((dlv.dt.hour > TH['wh_end']) | ((dlv.dt.hour == TH
 m['t24_scope'] = dlv.notna()
 m['f_24'] = m.h24_fail | m.wh_fail
 
-m['any_err'] = m[['f_user', 'f_geo', 'f_ot', 'f_dt', 'f_pl', 'f_cd', 'f_24']].any(axis=1)
+# On time và 24H đo năng lực giao hàng, KHÔNG tính là lỗi đơn (04/10/2026).
+m['any_err'] = m[['f_user', 'f_geo', 'f_dt', 'f_pl', 'f_cd']].any(axis=1)
+m['late'] = m.f_ot | m.f_24
 
 # ---------- LOGIC MỚI (04/10/2026): chấm theo chuyến ----------
 # Đơn lỗi = đơn có ít nhất 1 lỗi ở bất kỳ KPI nào. Chuyến fail khi đơn lỗi > 30% tổng đơn của chuyến.
@@ -200,7 +202,7 @@ def score(d, p, name):
     r['v_plan'] = 'PASS' if pf <= allow else 'FAIL'
     fp = p[p.plan_fail]
     r['plan_drivers'] = {k: int((fp[c] > 0).sum()) for k, c in
-                         [('Geo', 'e_geo'), ('On time', 'e_ot'), ('D&T', 'e_dt'), ('Payload', 'e_pl'), ('Created Date', 'e_cd'), ('User', 'e_user')]}
+                         [('Geo', 'e_geo'), ('D&T', 'e_dt'), ('Payload', 'e_pl'), ('Created Date', 'e_cd'), ('User', 'e_user')]}
     r['plan_sizes'] = [dict(label=l, plans=int(((p.orders >= a) & (p.orders <= b)).sum()),
                             fail=int(((fp.orders >= a) & (fp.orders <= b)).sum())) for a, b, l in
                        [(1, 1, '1 đơn'), (2, 3, '2–3 đơn'), (4, 6, '4–6 đơn'), (7, 10, '7–10 đơn'), (11, 9999, '11+ đơn')]]
@@ -283,15 +285,6 @@ def why(r):
         if r.g_x:
             rs.append('Ngoài giờ làm việc: thiếu thời điểm giao' if pd.isna(r.DeliverDateTime)
                       else f'Ngoài giờ làm việc: hoàn tất {r.DeliverDateTime:%H:%M} (chỉ tính 06:00–20:00)')
-    if r.f_24:
-        lab.append('24H')
-        if r.h24_fail:
-            rs.append('Tạo sau khi giao (24H âm)' if r.h24_dur < 0 else f'Giao sau {r.h24_dur:.1f} giờ tính SLA (quá {TH["sla_hours"]} giờ)')
-        if r.wh_fail: rs.append(f'Giao sau {TH["wh_end"]}:00 (hoàn tất {r.DeliverDateTime:%H:%M:%S})')
-    if r.f_ot:
-        lab.append('On time')
-        rs.append('Giao trễ hạn' + (f' {int(r.late_days)} ngày so với ngày hứa' if pd.notna(r.late_days) and r.late_days > 0 else
-                                    (' — chưa có giờ giao' if pd.isna(r.DeliverDateTime) else ' (TMS chấm is_ontime = 0)')))
     if r.f_dt:
         lab.append('D&T')
         rs.append(f'Cách outlet trước {r.time_outlet_outlet:.0f} phút, xa {r.dist_oo:,.0f}m' + (' — chuyến hỏng D&T' if r.plan_dt_fail else ' — chuyến vẫn trong mức cho phép'))
@@ -301,6 +294,23 @@ def why(r):
         rs.append(f'Đơn tạo sau khi giao {h/24:.1f} ngày' if h >= 24 else f'Đơn tạo sau khi giao {h:.1f} giờ')
         lab.append('Created Date')
     return ' + '.join(lab), '; '.join(rs)
+
+def late_why(r):
+    rs = []
+    if r.f_ot:
+        rs.append('On time: trễ ' + (f'{int(r.late_days)} ngày so với ngày hứa' if pd.notna(r.late_days) and r.late_days > 0 else
+                                    ('chưa có giờ giao' if pd.isna(r.DeliverDateTime) else 'theo SLA của TMS')))
+    if r.h24_fail:
+        rs.append('24H: tạo sau khi giao' if r.h24_dur < 0 else f'24H: {r.h24_dur:.1f} giờ (quá {TH["sla_hours"]} giờ)')
+    if r.wh_fail: rs.append(f'Giao sau {TH["wh_end"]}:00 (lúc {r.DeliverDateTime:%H:%M})')
+    return '; '.join(rs)
+
+LT = m[m.late].sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
+late_list = [dict(npp=r.TenantName, day=r.Date.strftime('%d/%m'), plan=r.PlanNumber, order=r.OrderNumber, user=r.username,
+                  created=fmt_dt(r.Sent_To_distributor), delivered=fmt_dt(r.DeliverDateTime),
+                  promised=r.PromisedDate.strftime('%d/%m') if pd.notna(r.PromisedDate) else '',
+                  hours=None if pd.isna(r.h24_dur) else round(float(r.h24_dur), 1),
+                  ot=bool(r.f_ot), h24=bool(r.h24_fail), wh=bool(r.wh_fail), why=late_why(r)) for r in LT.itertuples()]
 
 E = m[m.any_err].copy()
 lr = E.apply(why, axis=1)
@@ -326,7 +336,7 @@ pl_top = pl[pl.pl_fail].sort_values('ratio', ascending=False).reset_index()
 pl_top = [dict(plan=r.PlanNumber, npp=r.npp, truck=r.truck, orders=int(r.orders), weight=round(r.w, 2),
                cap=r.cap, ratio=r.ratio, date=r.date.strftime('%d/%m')) for r in pl_top.itertuples()]
 fpl = pl[pl.plan_fail].sort_values(['npp', 'err_ratio'], ascending=[True, False]).reset_index()
-def ptypes(r): return ', '.join(k for k, c in [('Geo', r.e_geo), ('On time', r.e_ot), ('D&T', r.e_dt), ('Payload', r.e_pl), ('Created Date', r.e_cd), ('User', r.e_user)] if c > 0)
+def ptypes(r): return ', '.join(k for k, c in [('Geo', r.e_geo), ('D&T', r.e_dt), ('Payload', r.e_pl), ('Created Date', r.e_cd), ('User', r.e_user)] if c > 0)
 plan_list = [dict(plan=r.PlanNumber, npp=r.npp, date=r.date.strftime('%d/%m'), user=r.user, orders=int(r.orders), err=int(r.err),
                   ratio=round(r.err_ratio * 100, 1), types=ptypes(r)) for r in fpl.itertuples()]
 cd_rows = m[m.f_cd].sort_values('cd_gap_h')
@@ -361,13 +371,13 @@ def variant(payload_zero=False, track_gates=False, any_rule=False):
         x = next(s for s in scorecard if s['npp'] == n)
         ok = x['v_dt'] == 'PASS' and x['v_created'] == 'PASS' and x['v_username'] == 'PASS'
         ok = ok and (x['payload_plans_fail'] == 0 if payload_zero else x['v_payload'] == 'PASS')
-        if track_gates: ok = ok and x['v_geo'] == 'PASS' and x['v_ontime'] == 'PASS'
+        if track_gates: ok = ok and x['v_geo'] == 'PASS'
         if any_rule: ok = x['v_plan'] == 'PASS' and x['v_created'] == 'PASS'
         out[n] = 'PASS' if ok else 'FAIL'
     return out
 sens = [dict(label='Đang áp dụng: 4 tiêu chí theo file chính thức, Payload dung sai < 5% chuyến', v=variant()),
         dict(label='Payload không cho phép chuyến nào quá tải (như file gốc)', v=variant(payload_zero=True)),
-        dict(label='Thêm Geo ≥ 85% và On time > 95% vào kết quả', v=variant(track_gates=True)),
+        dict(label='Thêm Geo ≥ 85% vào kết quả', v=variant(track_gates=True)),
         dict(label='Chuyến lỗi > 30% với bất kỳ KPI nào, dung sai 5% chuyến', v=variant(any_rule=True))]
 for s in sens: s['pass'] = sum(v == 'PASS' for v in s['v'].values())
 
@@ -378,7 +388,7 @@ DATA = dict(
               days=int(m.Date.dt.normalize().nunique())),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
-    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, cd_list=cd_list, dq=dq, sens=sens)
+    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, dq=dq, sens=sens)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 json.dump(DATA, open(OUT, 'w'), ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o))

@@ -51,7 +51,9 @@ Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lị
 | Created Date | đơn tạo (Fill Rate `Sent_To_distributor`, ghép `DocNo = OrderNumber`) sau giờ giao; 1 đơn lỗi là chuyến lỗi | 0 chuyến lỗi |
 | User name | tài khoản không phải SĐT, biển số xe hoặc DSA | 0 tài khoản sai |
 
-**Chỉ số theo dõi (không tính vào kết quả):** Geo Compliance (≥ 85%), On time `is_ontime` (> 95%), On time 24H (> 95%; chốt 17:00, thứ 7 sau 17:00 sang thứ 2, trừ Chủ nhật nếu không giao Chủ nhật, giao sau 20:00 là lỗi), Chuyến lỗi > 30% với bất kỳ KPI nào (≤ 5% chuyến).
+**Năng lực giao hàng (không tính là lỗi, không ảnh hưởng kết quả):** On time `is_ontime` (tham chiếu > 95%), On time 24H (tham chiếu > 95%; chốt 17:00, thứ 7 sau 17:00 sang thứ 2, trừ Chủ nhật nếu không giao Chủ nhật, giao sau 20:00 tính là chưa đạt).
+
+**Chỉ số theo dõi (không tính vào kết quả):** Geo Compliance (≥ 85%), Chuyến lỗi > 30% gộp lỗi Payload, D&T, Created Date, User name, Geo (≤ 5% chuyến).
 
 ## Cấu trúc
 

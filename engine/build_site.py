@@ -60,7 +60,7 @@ def slice_for(data, n):
              daily={n: data['daily'][n], 'ALL': data['daily'][n]}, geo_dist={n: data['geo_dist'][n]}, hours={n: data['hours'][n]},
              users={'ALL': keep(data['users']['ALL'])},
              dt_top=keep(data['dt_top']), pl_top=keep(data['pl_top']), cd_list=keep(data['cd_list']),
-             plan_list=keep(data['plan_list']))
+             plan_list=keep(data['plan_list']), late_list=keep(data.get('late_list', [])))
     d['meta'] = dict(data['meta'], npps=1)
     return d
 
