@@ -12,7 +12,7 @@ Dashboard KPI Data Accuracy của các nhà phân phối (NPP), tự cập nhậ
 
 Khoảng 2–3 phút sau trang dashboard tự cập nhật. Theo dõi tiến trình ở tab **Actions**: dấu ✓ xanh là xong, dấu ✕ đỏ là lỗi (bấm vào để xem lý do).
 
-Nếu repo để công khai (Public), sau khi dựng xong workflow sẽ tự xoá 2 file Excel khỏi `input/` để người ngoài không tải được dữ liệu gốc. Vì vậy mỗi lần cập nhật cần tải lên đủ cả 2 file.
+Sau khi dựng xong, workflow lưu một bản **mã hoá** của dữ liệu (`input/last_data.enc`) và, nếu repo công khai, xoá 2 file Excel gốc khỏi `input/` để người ngoài không tải được. Nhờ bản mã hoá này, khi sửa giao diện hoặc logic trong `engine/`, trang tự dựng lại với dữ liệu gần nhất mà không cần tải lại file. Mỗi lần cập nhật dữ liệu nên tải đủ cả 2 file.
 
 ## Cài đặt lần đầu (làm một lần)
 
@@ -58,6 +58,7 @@ input/                  nơi tải 2 file Excel lên
 engine/compute.py       tính toàn bộ KPI -> build/data.json
 engine/build_site.py    mã hoá dữ liệu, dựng docs/index.html
 engine/template.html    giao diện dashboard
+engine/vault.py         lưu / mở bản mã hoá của dữ liệu gần nhất
 .github/workflows/      workflow tự chạy khi có file mới
 ```
 

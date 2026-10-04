@@ -1,182 +1,219 @@
-<title>TMS Data Accuracy HCM Zone 2–3</title>
+<title>TMS Data Accuracy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap">
 <style>
-/* Layout: bảng điều khiển vận hành — thanh tiêu đề + tab, tóm tắt kết luận trước, chi tiết sau; một cột rộng tối đa 1240px */
+/* Layout: dải tiêu đề xanh đậm + tab; nội dung một cột tối đa 1200px: kết luận → 4 tiêu chí → theo dõi → bảng điểm → ưu tiên xử lý */
 :root{
-  --bg:#f2f4f1; --surface:#ffffff; --sunk:#e9ede8; --ink:#16201b; --muted:#56645c; --line:#d6ddd7;
-  --accent:#23466a; --accent-soft:#e2e9f1;
-  --good:#1f7f48; --good-soft:#e1f1e7; --warn:#a56a00; --warn-soft:#f8ecd2; --crit:#c0392f; --crit-soft:#f8e1de;
-  --f-display:"Bricolage Grotesque","Be Vietnam Pro",system-ui,sans-serif;
+  --bg:#f2f5f1; --surface:#ffffff; --sunk:#edf2ec; --ink:#10261a; --muted:#5a6b60; --line:#dce5da;
+  --brand:#007a33; --brand-deep:#0c3a1d; --brand-lt:#e2f1e5; --leaf:#5aaa1e; --on-brand:#ffffff;
+  --good:#18803c; --good-soft:#e1f2e6; --crit:#cf2f2b; --crit-soft:#fbe5e4; --warn:#a96500; --warn-soft:#fbefd8;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --f-head:"Lexend","Be Vietnam Pro",system-ui,sans-serif;
   --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-  --r:10px;
+  --r:14px; --shadow:0 1px 2px rgba(16,38,26,.06),0 6px 20px rgba(16,38,26,.05);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f1412; --surface:#171e1b; --sunk:#121816; --ink:#e4ebe6; --muted:#97a69d; --line:#2a3530;
-  --accent:#93b6dc; --accent-soft:#1d2a38;
-  --good:#52c27f; --good-soft:#15291e; --warn:#e2aa45; --warn-soft:#2e2412; --crit:#f07067; --crit-soft:#33191a; color-scheme:dark}}
+  --bg:#0b130f; --surface:#132019; --sunk:#0f1a14; --ink:#e6eee8; --muted:#97a99d; --line:#23342a;
+  --brand:#3fae63; --brand-deep:#08200f; --brand-lt:#15301f; --leaf:#7cc14a; --on-brand:#ffffff;
+  --good:#4cc27a; --good-soft:#12291b; --crit:#f07067; --crit-soft:#341a1a; --warn:#e2aa45; --warn-soft:#2e2412;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --shadow:none; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1412; --surface:#171e1b; --sunk:#121816; --ink:#e4ebe6; --muted:#97a69d; --line:#2a3530;
-  --accent:#93b6dc; --accent-soft:#1d2a38;
-  --good:#52c27f; --good-soft:#15291e; --warn:#e2aa45; --warn-soft:#2e2412; --crit:#f07067; --crit-soft:#33191a; color-scheme:dark}
+  --bg:#0b130f; --surface:#132019; --sunk:#0f1a14; --ink:#e6eee8; --muted:#97a99d; --line:#23342a;
+  --brand:#3fae63; --brand-deep:#08200f; --brand-lt:#15301f; --leaf:#7cc14a; --on-brand:#ffffff;
+  --good:#4cc27a; --good-soft:#12291b; --crit:#f07067; --crit-soft:#341a1a; --warn:#e2aa45; --warn-soft:#2e2412;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --shadow:none; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--f-body);margin:0}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
-h2{font-size:1.15rem;font-weight:700}
-h3{font-size:1rem;font-weight:600}
-.num,.mono,td.n,th.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--f-body);margin:0;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--f-head);font-weight:600;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h2{font-size:1.05rem} h3{font-size:.95rem}
 button,select,input{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.wrap{max-width:1240px;margin:0 auto;padding-inline:16px}
-.cap{color:var(--muted);margin:4px 0 0;max-width:75ch}
-.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+code{font-size:.85em;background:var(--sunk);padding:1px 5px;border-radius:5px}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:20px}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.86rem;max-width:72ch}
+.lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.num{font-family:var(--f-head);font-weight:600;letter-spacing:-.02em}
 
 /* ---------- đăng nhập ---------- */
-#login{min-height:100%;display:grid;place-items:center;padding:48px 16px}
-.lcard{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px;display:grid;gap:16px}
-.lcard h1{font-size:1.6rem}
+#login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.lside{background:radial-gradient(120% 90% at 0% 100%,var(--leaf) 0%,transparent 55%),linear-gradient(160deg,var(--brand) 0%,var(--brand-deep) 75%);color:var(--on-brand);padding:56px 48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.lside .k{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:600}
+.lside h1{font-size:clamp(2rem,4vw,3.1rem);line-height:1.08;margin-top:14px;font-weight:700}
+.lside p{opacity:.85;max-width:38ch;margin:14px 0 0}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pills span{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:500}
+.lmain{display:grid;place-items:center;padding:40px 20px}
+.lcard{width:min(380px,100%);display:grid;gap:16px}
+.lcard h2{font-size:1.4rem}
 .field{display:grid;gap:6px}
-.field label{font-weight:600;font-size:.85rem}
-.field input{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600}
-.btn:hover{border-color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
-.btn.sm{padding:5px 10px;font-size:.85rem}
-.lerr{color:var(--crit);font-weight:600;min-height:1.2em;margin:0}
-.lnote{font-size:.82rem;color:var(--muted);margin:0}
+.field label{font-weight:600;font-size:.82rem}
+.field input,.field select{padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.field input:focus{border-color:var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand);padding:12px}
+.btn.sm{padding:6px 11px;font-size:.82rem}
+.btn:disabled{opacity:.6;cursor:wait}
+.lerr{color:var(--crit);font-weight:600;min-height:1.2em;margin:0;font-size:.88rem}
+.note{font-size:.8rem;color:var(--muted);margin:0}
+@media (max-width:820px){#login{grid-template-columns:1fr}.lside{padding:36px 24px}}
 
-/* ---------- khung ---------- */
-header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
-.topin{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-block:12px}
-.brand{display:grid;gap:0;min-width:0;flex:1 1 280px}
-.brand h1{font-size:1.25rem}
-.brand .meta{color:var(--muted);font-size:.82rem}
+/* ---------- khung ứng dụng ---------- */
+header.top{background:var(--brand-deep);color:var(--on-brand);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.topin{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding-block:14px 6px}
+.brand{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:12px}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--leaf),var(--brand));display:grid;place-items:center;font-family:var(--f-head);font-weight:700}
+.brand h1{font-size:1.08rem}
+.brand .meta{font-size:.78rem;opacity:.75}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.tools select{padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg)}
-.who{font-size:.82rem;color:var(--muted)}
-nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-nav.tabs button{border:0;background:none;padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap}
-nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
-main{padding-block:20px 48px;display:grid;gap:18px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:12px;min-width:0}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:18px}
-footer{color:var(--muted);font-size:.8rem;padding-block:0 32px}
+.tools .btn,.tools select{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:var(--on-brand)}
+.tools select{padding:6px 10px;border-radius:10px;border:1px solid}
+.tools select option{color:#10261a}
+.who{font-size:.78rem;opacity:.8}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{border:0;background:none;padding:10px 12px 12px;cursor:pointer;color:var(--on-brand);opacity:.7;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs button:hover{opacity:1}
+nav.tabs button.on{opacity:1;border-bottom-color:var(--leaf)}
+main{padding-block:22px 48px;display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px;min-width:0;box-shadow:var(--shadow)}
+.ch{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:6px 14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:18px;align-items:start}
+footer{color:var(--muted);font-size:.78rem;padding-block:0 32px}
 
-/* ---------- kết luận ---------- */
-.verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
-.vbig{font-family:var(--f-display);font-size:2.6rem;font-weight:700;line-height:1}
-.vbig small{font-size:1rem;color:var(--muted);font-weight:600}
-.vtext{display:grid;gap:4px;min-width:0}
-.pass{color:var(--good)} .fail{color:var(--crit)}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.75rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.ring{width:132px;height:132px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1}
+.ring .c b{font-family:var(--f-head);font-size:2.3rem;font-weight:700}
+.ring .c small{display:block;color:var(--muted);font-size:.78rem;margin-top:4px}
+.hero h2{font-size:1.45rem}
+.verdict{font-family:var(--f-head);font-size:2rem;font-weight:700;line-height:1}
+.npps{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:6px}
+.npill{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);cursor:pointer;display:grid;gap:2px;text-align:left}
+.npill:hover{border-color:var(--brand)}
+.npill b{font-family:var(--f-head);font-weight:600;display:flex;gap:6px;align-items:center}
+.npill span{font-size:.75rem;color:var(--muted)}
+.npill.ok{border-left:4px solid var(--good)} .npill.no{border-left:4px solid var(--crit)}
+@media (max-width:640px){.hero{grid-template-columns:1fr}.ring{width:112px;height:112px}}
+
+/* ---------- chip / ô KPI ---------- */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap}
 .chip.ok{background:var(--good-soft);color:var(--good)}
 .chip.no{background:var(--crit-soft);color:var(--crit)}
 .chip.na{background:var(--sunk);color:var(--muted)}
-.chip.new{background:var(--accent-soft);color:var(--accent)}
-.npps{display:flex;flex-wrap:wrap;gap:6px}
-.npill{border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:var(--bg);cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-weight:600}
-.npill i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.npill:hover{border-color:var(--accent)}
-
-/* ---------- ô tiêu chí ---------- */
-.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
-.kpi{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:6px;background:var(--surface);cursor:pointer;text-align:left;border-top:3px solid var(--line)}
-.kpi.ok{border-top-color:var(--good)} .kpi.no{border-top-color:var(--crit)}
-.kpi:hover{border-color:var(--accent)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;background:var(--surface);cursor:pointer;text-align:left;align-content:start}
+.kpi:hover{border-color:var(--brand)}
 .kpi .kh{display:flex;justify-content:space-between;gap:8px;align-items:center}
-.kpi .kn{font-weight:700;font-size:.9rem}
-.kpi .kv{font-family:var(--f-mono);font-size:1.55rem;font-weight:600;line-height:1.1}
-.kpi .kt{font-size:.78rem;color:var(--muted)}
-.bar{height:6px;background:var(--sunk);border-radius:3px;position:relative;overflow:visible}
-.bar b{display:block;height:100%;border-radius:3px}
-.bar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.kpi .kn{font-weight:600;font-size:.88rem}
+.kpi .kv{font-family:var(--f-head);font-size:1.9rem;font-weight:600;line-height:1;letter-spacing:-.02em}
+.kpi .kv small{font-size:.9rem;color:var(--muted);font-weight:500;margin-left:3px}
+.kpi .kt{font-size:.76rem;color:var(--muted)}
+.kpi.trk .kv{font-size:1.45rem}
+.meter{height:6px;background:var(--sunk);border-radius:3px;position:relative}
+.meter b{display:block;height:100%;border-radius:3px}
+.meter i{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}
 
 /* ---------- bảng ---------- */
-.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
-table{border-collapse:collapse;width:100%;font-size:.85rem}
-th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-thead th{background:var(--sunk);font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);position:sticky;top:0;white-space:nowrap}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{padding:8px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
+thead th{background:var(--sunk);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;white-space:nowrap}
 td.n,th.n{text-align:right;white-space:nowrap}
-tbody tr:last-child td{border-bottom:0}
-tr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:600}
+tr.click{cursor:pointer} tr.click:hover td,tr.click:hover th{background:var(--brand-lt)}
 td.cok{color:var(--good);font-weight:600} td.cno{color:var(--crit);font-weight:700;background:var(--crit-soft)}
-.matrix td.n{min-width:84px}
+tr.tot th,tr.tot td{background:var(--sunk);font-weight:600}
+.mono{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:.8rem}
+.why{color:var(--muted);font-size:.78rem;max-width:44ch;min-width:28ch;white-space:normal}
 
-/* ---------- việc cần làm ---------- */
-.todo{display:grid;gap:8px;align-content:start;margin:0;padding:0;list-style:none}
-.todo li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:8px;background:var(--crit-soft)}
+/* ---------- ưu tiên ---------- */
+.todo{display:grid;gap:8px;margin:0;padding:0;list-style:none;align-content:start}
+.todo li{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--crit-soft)}
 .todo li.okk{background:var(--good-soft)}
-.todo .tn{font-family:var(--f-mono);font-weight:700;font-size:1.1rem;min-width:3.5ch;text-align:right}
+.todo .tn{font-family:var(--f-head);font-weight:700;font-size:1.25rem;text-align:center;line-height:1}
+.todo .tn small{display:block;font-size:.62rem;font-weight:500;color:var(--muted);margin-top:3px}
 
 /* ---------- tab con ---------- */
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:.85rem;display:inline-flex;gap:6px;align-items:center}
-.seg button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.segs{display:grid;gap:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.seg .lbl{min-width:64px}
+.seg button{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:.83rem;display:inline-flex;gap:6px;align-items:center}
+.seg button.on{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
 .seg button i{width:7px;height:7px;border-radius:50%}
 
 /* ---------- biểu đồ ---------- */
 .chart{width:100%;overflow-x:auto}
 .chart svg{display:block;max-width:100%;height:auto}
-.chart text{fill:var(--muted);font:11px var(--f-mono)}
-.chart .lbl{fill:var(--ink);font:600 12px var(--f-body)}
-.chart .val{fill:var(--ink);font:600 11px var(--f-mono)}
+.chart text{fill:var(--muted);font:11px var(--f-body)}
+.chart .tl{fill:var(--ink);font:600 12px var(--f-body)}
+.chart .tv{fill:var(--ink);font:600 11px var(--f-body)}
 .grid-l{stroke:var(--line)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;gap:6px;align-items:center}
-.legend i{width:12px;height:4px;border-radius:2px;display:inline-block}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
 
 /* ---------- bộ lọc ---------- */
-.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
 .filters .field{min-width:0}
-.filters input,.filters select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-.filters input[type=search]{width:min(260px,100%)}
-.pager{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.85rem}
-.why{color:var(--muted);font-size:.8rem;max-width:46ch}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:600;z-index:9}
+.filters input,.filters select{padding:8px 11px;border-radius:10px}
+.filters input[type=search]{width:min(240px,100%)}
+.check{display:inline-flex;gap:6px;align-items:center;padding-bottom:9px;font-size:.84rem}
+.pager{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.84rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;z-index:9}
 
-/* ---------- cách chấm ---------- */
-.gate{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:8px}
-.gate div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:600;background:var(--bg);display:grid;gap:2px}
-.gate div span{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-weight:400}
-.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}
-.rule{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:8px;align-content:start}
+/* ---------- cách tính ---------- */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.rule{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:8px;align-content:start}
 .rule .rh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.rule .rt{font-family:var(--f-mono);font-weight:600;color:var(--accent)}
-.rule p{margin:0}
-.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 8px 8px 0}
-.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
-.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:10px}
-.dl div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
-.dl b{font-family:var(--f-mono);font-size:1.25rem}
-.dl span{font-size:.8rem;color:var(--muted)}
-@media (max-width:640px){.vbig{font-size:2rem}.verdict{grid-template-columns:1fr}.card{padding:14px}}
-@media (prefers-reduced-motion:no-preference){.kpi,.npill,.btn{transition:border-color .15s}}
+.rule .rt{font-family:var(--f-head);font-weight:600;color:var(--brand);font-size:.85rem;text-align:right}
+.rule p{margin:0;font-size:.88rem}
+.rule.trk{background:var(--sunk)}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.flow div{border-radius:12px;padding:14px;background:var(--brand-lt);display:grid;gap:4px}
+.flow b{font-family:var(--f-head);font-size:1.1rem;color:var(--brand)}
+@media (max-width:640px){.flow{grid-template-columns:1fr}}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:10px}
+.stats div{border:1px solid var(--line);border-radius:10px;padding:11px 13px;display:grid;gap:2px}
+.stats b{font-family:var(--f-head);font-size:1.25rem;font-weight:600}
+.stats span{font-size:.78rem;color:var(--muted)}
+@media (max-width:640px){.card{padding:16px}.wrap{padding-inline:16px}}
+@media (prefers-reduced-motion:no-preference){.kpi,.npill,.btn,tr.click td{transition:border-color .15s,background-color .15s}}
 </style>
 
 <div id="login">
-  <form class="lcard" id="lform" autocomplete="off">
-    <div><div class="eyebrow">Operation Excellence · DIP</div>
-    <h1>TMS Data Accuracy</h1>
-    <p class="cap" id="lper"></p></div>
-    <div class="field"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" placeholder="Mã NPP, ví dụ 10260142" required></div>
-    <div class="field"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required></div>
-    <p class="lerr" id="lerr" role="alert"></p>
-    <button class="btn primary" type="submit">Đăng nhập</button>
-    <p class="lnote">Nhà phân phối đăng nhập bằng mã NPP (DisCode) và chỉ mở được dữ liệu của mình. Dữ liệu trên trang được mã hoá.</p>
-  </form>
+  <section class="lside">
+    <div><div class="k">Operation Excellence · DIP</div>
+      <h1>TMS Data<br>Accuracy</h1>
+      <p>Kết quả Data Accuracy theo tháng và chi tiết lỗi đến từng đơn, từng chuyến.</p></div>
+    <div class="pills"><span>Payload</span><span>Distance &amp; Time</span><span>Created Date</span><span>User name</span></div>
+  </section>
+  <section class="lmain">
+    <form class="lcard" id="lform" autocomplete="off">
+      <div><h2>Đăng nhập</h2><p class="sub" id="lper"></p></div>
+      <div class="field"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" placeholder="Mã NPP, ví dụ 10260142" required></div>
+      <div class="field"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required></div>
+      <p class="lerr" id="lerr" role="alert"></p>
+      <button class="btn primary" type="submit">Đăng nhập</button>
+      <p class="note">NPP chỉ xem được dữ liệu của mình. Dữ liệu được mã hoá.</p>
+    </form>
+  </section>
 </div>
 
 <div id="app" hidden>
   <header class="top"><div class="wrap">
     <div class="topin">
-      <div class="brand"><h1>TMS Data Accuracy</h1><div class="meta" id="hmeta"></div></div>
+      <div class="brand"><div class="mark" aria-hidden="true">DA</div><div><h1>TMS Data Accuracy</h1><div class="meta" id="hmeta"></div></div></div>
       <div class="tools">
         <label class="who" for="scope" id="who"></label>
         <select id="scope" hidden></select>
-        <button class="btn sm" id="theme" type="button" aria-pressed="false">Sáng / tối</button>
+        <button class="btn sm" id="theme" type="button" aria-pressed="false">Sáng / Tối</button>
         <button class="btn sm" id="logout" type="button">Đăng xuất</button>
       </div>
     </div>
@@ -190,8 +227,7 @@ td.cok{color:var(--good);font-weight:600} td.cno{color:var(--crit);font-weight:7
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const ENC = /*__ENC__*/;
-/* Dữ liệu được mã hoá AES-GCM, khoá dẫn xuất PBKDF2-SHA256 từ mật khẩu. Mỗi tài khoản có gói dữ liệu riêng:
-   admin giải mã được toàn bộ, mỗi NPP chỉ giải mã được dữ liệu của mình. Sai mật khẩu thì không giải mã được. */
+/* Dữ liệu mã hoá AES-GCM, khoá dẫn xuất PBKDF2-SHA256 từ mật khẩu. Admin giải mã toàn bộ, mỗi NPP chỉ giải mã phần của mình. */
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function unlock(user,pass){
   const u=String(user||'').trim().toLowerCase(), blob=ENC.blobs[u]||ENC.blobs[(ENC.alias||{})[u]];
@@ -207,11 +243,11 @@ async function unlock(user,pass){
 document.getElementById('lper').textContent='Kỳ '+ENC.period+' · cập nhật '+ENC.built;
 document.getElementById('lform').addEventListener('submit',async e=>{e.preventDefault();
   const btn=e.target.querySelector('button[type=submit]'),err=document.getElementById('lerr'),u=document.getElementById('lu').value;
-  btn.disabled=true;err.textContent='Đang mở dữ liệu…';
+  btn.disabled=true;err.textContent='';btn.textContent='Đang mở dữ liệu…';
   const D=await unlock(u,document.getElementById('lp').value);
-  btn.disabled=false;document.getElementById('lp').value='';
-  if(!D){err.textContent='Tên đăng nhập hoặc mật khẩu không đúng.';document.getElementById('lp').focus();return;}
-  err.textContent='';startApp(D,D.__role);
+  btn.disabled=false;btn.textContent='Đăng nhập';document.getElementById('lp').value='';
+  if(!D){err.textContent='Sai tên đăng nhập hoặc mật khẩu.';document.getElementById('lp').focus();return;}
+  startApp(D,D.__role);
 });
 document.getElementById('lu').focus();
 </script>
@@ -227,19 +263,8 @@ const fmt=v=>v==null?'—':Number(v).toLocaleString('vi-VN');
 const pc=(v,d=2)=>v==null?'—':Number(v).toLocaleString('vi-VN',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
 const n1=(v,d=1)=>v==null?'—':Number(v).toLocaleString('vi-VN',{maximumFractionDigits:d});
 const SC=Object.fromEntries(DATA.scorecard.map(s=>[s.npp,s]));
-
-/* 7 tiêu chí — thứ tự hiển thị, ngưỡng, cách đọc giá trị */
-const CR=[
- {k:'username',n:'User name',v:s=>s.username_pct,u:'%',th:'100%',ok:s=>s.v_username,sub:s=>fmt(s.username_fail)+' đơn tài khoản không hợp lệ',thr:100},
- {k:'geo',n:'Geo Compliance',v:s=>s.geo_pct,u:'%',th:'≥ '+TH.geo+'%',ok:s=>s.v_geo,sub:s=>fmt(s.geo_fail)+' / '+fmt(s.geo_scope)+' đơn lỗi (không tính DSA)',thr:TH.geo},
- {k:'ontime',n:'On time',v:s=>s.ot_pct,u:'%',th:'> '+TH.ontime+'%',ok:s=>s.v_ontime,sub:s=>fmt(s.ot_fail)+' đơn trễ hạn',thr:TH.ontime},
- {k:'successful',n:'Successful',v:s=>s.succ_pct,u:'%',th:'> '+TH.successful+'%',ok:s=>s.v_successful,sub:()=>'Dùng chung kết quả On time',thr:TH.successful},
- {k:'dt',n:'Distance & Time',v:s=>s.dt_route_fail_pct,u:'% chuyến',th:'< '+(TH.dt_month_pct*100)+'% chuyến',ok:s=>s.v_dt,sub:s=>fmt(s.dt_routes_fail)+' / '+fmt(s.plans)+' chuyến hỏng',thr:TH.dt_month_pct*100,low:true},
- {k:'payload',n:'Payload',v:s=>s.payload_plans_fail,u:' chuyến',th:'0 chuyến quá tải',ok:s=>s.v_payload,sub:s=>'Tỷ lệ tải cao nhất '+n1(s.payload_max_ratio,2)+' lần',cnt:true},
- {k:'created',n:'Created Date',v:s=>s.cd_pct,u:'%',th:'100% (đề xuất)',ok:s=>s.v_created,sub:s=>fmt(s.cd_fail)+' đơn tạo sau khi giao',thr:100,isNew:true}
-];
-const crOf=k=>CR.find(c=>c.k===k);
-const valTxt=(c,s)=>c.cnt?fmt(c.v(s)):pc(c.v(s));
+const T_PLAN=Math.round(TH.plan_err_pct*100), T_TOL=Math.round(TH.npp_plan_tol*100);
+const T_DT=TH.dt_month_pct*100, T_PL=TH.payload_tol*100;
 
 let role=null, scope='ALL', page='overview', kpiSel='payload';
 let EF={q:'',type:'',day:'',npp:'',pf:false}, epage=1;
@@ -247,241 +272,223 @@ const isAdmin=()=>role==='admin';
 const curS=()=>scope==='ALL'?DATA.total:SC[scope];
 const rowsIn=arr=>scope==='ALL'?arr:arr.filter(r=>(r.npp??r.TenantName)===scope);
 
-/* ---------------- biểu đồ SVG ---------------- */
-function hbar(items,{thr=null,max=null,unit='%',low=false,fmtv=v=>pc(v),onclick=''}={}){
-  const W=760,lw=74,rw=70,rh=26,H=items.length*rh+30;
-  const mx=max??(Math.max(...items.map(i=>i.v||0),thr||0)*1.05||1);
+/* ---------------- biểu đồ ---------------- */
+function hbar(items,{thr=null,max=null,fmtv=v=>pc(v)}={}){
+  const W=760,lw=64,rw=86,rh=28,H=items.length*rh+30;
+  const raw=max??(Math.max(...items.map(i=>i.v||0),thr||0)*1.08||1);
+  const mx=(()=>{const e=Math.pow(10,Math.floor(Math.log10(raw)));for(const m of [1,2,2.5,5,10]) if(m*e>=raw) return m*e;return 10*e;})();
   const x=v=>lw+(W-lw-rw)*(Math.max(0,v)/mx);
-  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Biểu đồ thanh">`;
-  [0,.25,.5,.75,1].forEach(t=>{const xx=lw+(W-lw-rw)*t;s+=`<line class="grid-l" x1="${xx}" x2="${xx}" y1="4" y2="${H-22}"/><text x="${xx}" y="${H-6}" text-anchor="middle">${n1(mx*t,mx<10?1:0)}</text>`;});
-  items.forEach((it,i)=>{const y=6+i*rh;const bad=it.bad;
-    s+=`<g ${onclick?`style="cursor:pointer" data-npp="${esc(it.l)}"`:''}><text class="lbl" x="${lw-8}" y="${y+14}" text-anchor="end">${esc(it.l)}</text>`;
-    s+=`<rect x="${lw}" y="${y+3}" width="${Math.max(1,x(it.v)-lw)}" height="${rh-10}" rx="3" fill="${bad?'var(--crit)':'var(--good)'}" opacity="${bad?.9:.75}"/>`;
-    s+=`<text class="val" x="${x(it.v)+6}" y="${y+14}">${fmtv(it.v)}</text></g>`;});
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Biểu đồ theo NPP">`;
+  [0,.5,1].forEach(t=>{const xx=lw+(W-lw-rw)*t;s+=`<line class="grid-l" x1="${xx}" x2="${xx}" y1="4" y2="${H-22}"/><text x="${xx}" y="${H-6}" text-anchor="middle">${n1(mx*t,mx<10?1:0)}</text>`;});
+  items.forEach((it,i)=>{const y=6+i*rh;
+    s+=`<text class="tl" x="${lw-10}" y="${y+15}" text-anchor="end">${esc(it.l)}</text>`;
+    s+=`<rect x="${lw}" y="${y+5}" width="${Math.max(2,x(it.v)-lw)}" height="${rh-12}" rx="4" fill="${it.bad?'var(--crit)':'var(--good)'}"><title>${esc(it.l)}: ${fmtv(it.v)}</title></rect>`;
+    s+=`<text class="tv" x="${x(it.v)+6}" y="${y+15}">${it.bad?'✕ ':''}${fmtv(it.v)}</text>`;});
   if(thr!=null){const tx=x(thr);s+=`<line x1="${tx}" x2="${tx}" y1="0" y2="${H-22}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>`;}
   return `<div class="chart">${s}</svg></div>`;
 }
-function vbar(items,{color='var(--accent)',hl=null,fmtv=fmt}={}){
-  const W=560,H=220,pl=44,pb=34,pt=16;const mx=Math.max(...items.map(i=>i.v),1)*1.1;
+function vbar(items,{color='var(--brand)',hl=null,fmtv=fmt}={}){
+  const W=560,H=210,pl=44,pb=32,pt=18;const mx=Math.max(...items.map(i=>i.v),1)*1.12;
   const bw=(W-pl-10)/items.length;
   let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Biểu đồ cột">`;
   [0,.5,1].forEach(t=>{const y=H-pb-(H-pb-pt)*t;s+=`<line class="grid-l" x1="${pl}" x2="${W-10}" y1="${y}" y2="${y}"/><text x="${pl-6}" y="${y+4}" text-anchor="end">${fmt(Math.round(mx*t))}</text>`;});
-  items.forEach((it,i)=>{const h=(H-pb-pt)*(it.v/mx), x=pl+i*bw+bw*.15, y=H-pb-h;
-    const c=hl&&hl(it)?'var(--crit)':color;
-    s+=`<rect x="${x}" y="${y}" width="${bw*.7}" height="${Math.max(h,0)}" rx="2" fill="${c}"><title>${esc(it.l)}: ${fmtv(it.v)}</title></rect>`;
-    if(items.length<=12) s+=`<text class="val" x="${x+bw*.35}" y="${y-4}" text-anchor="middle">${fmtv(it.v)}</text>`;
-    if(items.length<=12||i%2===0) s+=`<text x="${x+bw*.35}" y="${H-pb+16}" text-anchor="middle">${esc(it.l)}</text>`;});
+  items.forEach((it,i)=>{const h=(H-pb-pt)*(it.v/mx), x=pl+i*bw+bw*.18, y=H-pb-h;
+    s+=`<rect x="${x}" y="${y}" width="${bw*.64}" height="${Math.max(h,0)}" rx="3" fill="${hl&&hl(it)?'var(--crit)':color}"><title>${esc(it.l)}: ${fmtv(it.v)}</title></rect>`;
+    if(items.length<=12) s+=`<text class="tv" x="${x+bw*.32}" y="${y-5}" text-anchor="middle">${fmtv(it.v)}</text>`;
+    if(items.length<=12||i%2===0) s+=`<text x="${x+bw*.32}" y="${H-pb+16}" text-anchor="middle">${esc(it.l)}</text>`;});
   return `<div class="chart">${s}</svg></div>`;
 }
-function lines(days,series,{min=60,max=100}={}){
-  const W=900,H=280,pl=44,pr=14,pt=14,pb=34;
+function lines(days,series,{min=50,max=100}={}){
+  const W=900,H=270,pl=44,pr=14,pt=14,pb=32;
   const x=i=>pl+(W-pl-pr)*(days.length<2?.5:i/(days.length-1));
   const y=v=>pt+(H-pt-pb)*(1-(Math.max(min,Math.min(max,v))-min)/(max-min));
-  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Biểu đồ đường theo ngày">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Biểu đồ theo ngày">`;
   for(let v=min;v<=max;v+=10){s+=`<line class="grid-l" x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end">${v}%</text>`;}
-  days.forEach((d,i)=>{if(i%3===0||i===days.length-1) s+=`<text x="${x(i)}" y="${H-12}" text-anchor="middle">${d}</text>`;});
+  days.forEach((d,i)=>{if(i%3===0||i===days.length-1) s+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle">${d}</text>`;});
   series.forEach(se=>{
-    if(se.thr!=null) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(se.thr)}" y2="${y(se.thr)}" stroke="${se.c}" stroke-dasharray="5 4" opacity=".7"/>`;
-    const pts=se.v.map((v,i)=>v==null?null:[x(i),y(v)]);
-    let d='';pts.forEach(p=>{if(p) d+=(d?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);});
-    s+=`<path d="${d}" fill="none" stroke="${se.c}" stroke-width="2"/>`;
-    pts.forEach((p,i)=>{if(p) s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${se.thr!=null&&se.v[i]<se.thr?3.5:2}" fill="${se.thr!=null&&se.v[i]<se.thr?'var(--crit)':se.c}"><title>${days[i]} · ${se.n}: ${pc(se.v[i])}</title></circle>`;});
+    let d='';se.v.forEach((v,i)=>{if(v!=null) d+=(d?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);});
+    s+=`<path d="${d}" fill="none" stroke="${se.c}" stroke-width="2" stroke-linejoin="round"/>`;
+    se.v.forEach((v,i)=>{if(v!=null) s+=`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="transparent"><title>${days[i]} · ${se.n}: ${pc(v)}</title></circle>`;});
   });
   return `<div class="chart">${s}</svg></div>`;
 }
-
-/* ---------------- bảng ---------------- */
-function table(head,rows,{cls='',click=null}={}){
-  return `<div class="tscroll"><table class="${cls}"><thead><tr>${head.map(h=>`<th class="${h[1]||''}" scope="col">${h[0]}</th>`).join('')}</tr></thead><tbody>${
-    rows.length?rows.join(''):`<tr><td colspan="${head.length}" style="color:var(--muted)">Không có dòng nào.</td></tr>`}</tbody></table></div>`;
+function ring(pass,total){
+  const r=52,c=2*Math.PI*r,f=total?pass/total:0;
+  return `<div class="ring"><svg viewBox="0 0 132 132" aria-hidden="true"><circle cx="66" cy="66" r="${r}" fill="none" stroke="var(--crit-soft)" stroke-width="14"/><circle cx="66" cy="66" r="${r}" fill="none" stroke="var(--good)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c*f} ${c}"/></svg><div class="c"><div><b>${pass}/${total}</b><small>NPP đạt</small></div></div></div>`;
 }
-const chip=v=>v==='PASS'?'<span class="chip ok">✓ ĐẠT</span>':v==='FAIL'?'<span class="chip no">✕ KHÔNG ĐẠT</span>':'<span class="chip na">Chưa chấm</span>';
 
-/* ---------------- việc cần làm ---------------- */
-/* ---------------- KẾT QUẢ DATA ACCURACY: 4 tiêu chí theo file chính thức ---------------- */
-const T_PLAN=Math.round(TH.plan_err_pct*100), T_TOL=Math.round(TH.npp_plan_tol*100);
-const T_DT=TH.dt_month_pct*100, T_PL=TH.payload_tol*100;
-const DRV=[['Geo','geo'],['On time','ontime'],['D&T','dt'],['Payload','payload'],['Created Date','created'],['User','username']];
-/* 4 tiêu chí tính kết quả */
+/* ---------------- bảng & nhãn ---------------- */
+function table(head,rows){
+  return `<div class="tscroll"><table><thead><tr>${head.map(h=>`<th class="${h[1]||''}" scope="col">${h[0]}</th>`).join('')}</tr></thead><tbody>${
+    rows.length?rows.join(''):`<tr><td colspan="${head.length}" style="color:var(--muted)">Không có dữ liệu.</td></tr>`}</tbody></table></div>`;
+}
+const chip=v=>v==='PASS'?'<span class="chip ok">✓ Đạt</span>':'<span class="chip no">✕ Không đạt</span>';
+const trkChip=v=>v==='PASS'?'<span class="chip ok">✓ Trong mức</span>':'<span class="chip warn">! Dưới mức</span>';
+
+/* ---------------- định nghĩa tiêu chí ---------------- */
 const DA=[
- {k:'payload',n:'Payload',v:s=>pc(s.payload_fail_pct),ok:s=>s.v_payload,th:'Chuyến quá tải < '+T_PL+'% số chuyến',
-  sub:s=>`${fmt(s.payload_plans_fail)} / ${fmt(s.plans)} chuyến chở ≥ ${TH.payload_ratio} lần tải trọng`,bar:s=>[s.payload_fail_pct,T_PL]},
- {k:'dt',n:'Distance & Time',v:s=>pc(s.dt_route_fail_pct),ok:s=>s.v_dt,th:'Chuyến hỏng < '+T_DT+'% số chuyến',
-  sub:s=>`${fmt(s.dt_routes_fail)} / ${fmt(s.plans)} chuyến hỏng · ${fmt(s.dt_orders_fail)} đơn lỗi`,bar:s=>[s.dt_route_fail_pct,T_DT]},
- {k:'created',n:'Created Date',v:s=>fmt(s.cd_routes_fail)+' chuyến',ok:s=>s.v_created,th:'0 chuyến lỗi',
+ {k:'payload',n:'Payload',v:s=>pc(s.payload_fail_pct),ok:s=>s.v_payload,th:`Ngưỡng < ${T_PL}% chuyến`,
+  sub:s=>`${fmt(s.payload_plans_fail)}/${fmt(s.plans)} chuyến quá tải`,bar:s=>[s.payload_fail_pct,T_PL]},
+ {k:'dt',n:'Distance & Time',v:s=>pc(s.dt_route_fail_pct),ok:s=>s.v_dt,th:`Ngưỡng < ${T_DT}% chuyến`,
+  sub:s=>`${fmt(s.dt_routes_fail)}/${fmt(s.plans)} chuyến lỗi`,bar:s=>[s.dt_route_fail_pct,T_DT]},
+ {k:'created',n:'Created Date',v:s=>`${fmt(s.cd_routes_fail)}<small>chuyến</small>`,ok:s=>s.v_created,th:'Ngưỡng 0 chuyến',
   sub:s=>`${fmt(s.cd_fail)} đơn tạo sau khi giao`},
- {k:'username',n:'User name',v:s=>fmt(s.users_wrong)+' tài khoản',ok:s=>s.v_username,th:'0 tài khoản sai',
+ {k:'username',n:'User name',v:s=>`${fmt(s.users_wrong)}<small>tài khoản</small>`,ok:s=>s.v_username,th:'Ngưỡng 0 tài khoản sai',
   sub:s=>`${fmt(s.users_total)} tài khoản giao hàng`}];
-/* chỉ số theo dõi, không tính vào kết quả */
 const TRK=[
- {k:'geo',n:'Geo Compliance',v:s=>pc(s.geo_pct),ok:s=>s.v_geo,th:'Tham chiếu ≥ '+TH.geo+'%',sub:s=>`${fmt(s.geo_fail)} / ${fmt(s.geo_scope)} đơn lỗi (không tính DSA)`},
- {k:'ontime',n:'On time',v:s=>pc(s.ot_pct),ok:s=>s.v_ontime,th:'Tham chiếu > '+TH.ontime+'%',sub:s=>`${fmt(s.ot_fail)} đơn trễ hạn · Successful dùng chung`},
- {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct),ok:s=>s.v_24,th:'Tham chiếu > '+TH.ontime+'%',sub:s=>`${fmt(s.t24_fail)} / ${fmt(s.t24_scope)} đơn lỗi · ${fmt(s.h24_fail)} quá 24H · ${fmt(s.wh_fail)} giao sau ${TH.wh_end}:00`},
- {k:'plan',n:'Chuyến lỗi > '+T_PLAN+'%',v:s=>pc(s.plan_fail_pct),ok:s=>s.v_plan,th:'Tham chiếu ≤ '+T_TOL+'% số chuyến',sub:s=>`${fmt(s.plan_fail)} / ${fmt(s.plans)} chuyến có trên ${T_PLAN}% đơn lỗi ở bất kỳ KPI nào`}];
-const trkChip=v=>v==='PASS'?'<span class="chip ok">trong ngưỡng</span>':'<span class="chip no">dưới ngưỡng</span>';
+ {k:'geo',n:'Geo Compliance',v:s=>pc(s.geo_pct,1),ok:s=>s.v_geo,th:`Mức tham chiếu ≥ ${TH.geo}%`,sub:s=>`${fmt(s.geo_fail)} đơn lỗi`},
+ {k:'ontime',n:'On time',v:s=>pc(s.ot_pct,1),ok:s=>s.v_ontime,th:`Mức tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.ot_fail)} đơn trễ`},
+ {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Mức tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} quá 24H · ${fmt(s.wh_fail)} sau ${TH.wh_end}:00`},
+ {k:'plan',n:`Chuyến lỗi > ${T_PLAN}%`,v:s=>pc(s.plan_fail_pct,1),ok:s=>s.v_plan,th:`Mức tham chiếu ≤ ${T_TOL}%`,sub:s=>`${fmt(s.plan_fail)}/${fmt(s.plans)} chuyến, mọi loại lỗi`}];
+const DRV=[['Geo'],['On time'],['D&T'],['Payload'],['Created Date'],['User']];
 
+function tile(c,s,all,track){
+  const ok=c.ok(s)==='PASS';
+  let bar='';
+  if(c.bar){const [v,t]=c.bar(s);bar=`<div class="meter" aria-hidden="true"><b style="width:${Math.min(100,(v||0)/(t*3)*100)}%;background:${ok?'var(--good)':'var(--crit)'}"></b><i style="left:33.3%"></i></div>`;}
+  const npass=all?DATA.scorecard.filter(x=>c.ok(x)==='PASS').length:null;
+  return `<button type="button" class="kpi ${track?'trk':''}" data-kpi="${c.k}">
+    <div class="kh"><span class="kn">${c.n}</span>${track?trkChip(c.ok(s)):chip(c.ok(s))}</div>
+    <div class="kv">${c.v(s)}</div>${bar}
+    <div class="kt">${esc(c.sub(s))}</div>
+    <div class="kt">${esc(c.th)}${all?` · ${npass}/${NPPS.length} NPP ${track?'trong mức':'đạt'}`:''}</div></button>`;
+}
 function gaps(s){
   const g=[], m=s.margin;
-  if(s.v_payload==='FAIL') g.push([-m.pl_margin,'chuyến',`Payload: cần giảm ${fmt(-m.pl_margin)} chuyến quá tải để về dưới ${T_PL}% (được phép tối đa ${fmt(m.pl_allow)} chuyến).`]);
-  if(s.v_dt==='FAIL') g.push([-m.dt_margin,'chuyến',`Distance & Time: cần giảm ${fmt(-m.dt_margin)} chuyến hỏng để về dưới ${T_DT}% (được phép tối đa ${fmt(m.dt_allow)} chuyến).`]);
-  if(s.v_created==='FAIL') g.push([s.cd_routes_fail,'chuyến',`Created Date: ${fmt(s.cd_routes_fail)} chuyến có đơn tạo sau khi giao (${fmt(s.cd_fail)} đơn). Không cho phép chuyến nào.`]);
-  if(s.v_username==='FAIL') g.push([s.users_wrong,'tài khoản',`User name: đổi ${fmt(s.users_wrong)} tài khoản sai sang SĐT tài xế, biển số xe hoặc tài khoản DSA.`]);
+  if(s.v_payload==='FAIL') g.push([-m.pl_margin,'chuyến',`Payload: giảm ${fmt(-m.pl_margin)} chuyến quá tải (tối đa ${fmt(m.pl_allow)} chuyến).`]);
+  if(s.v_dt==='FAIL') g.push([-m.dt_margin,'chuyến',`Distance & Time: giảm ${fmt(-m.dt_margin)} chuyến lỗi (tối đa ${fmt(m.dt_allow)} chuyến).`]);
+  if(s.v_created==='FAIL') g.push([s.cd_routes_fail,'chuyến',`Created Date: rà ${fmt(s.cd_fail)} đơn tạo sau khi giao. Không cho phép chuyến nào.`]);
+  if(s.v_username==='FAIL') g.push([s.users_wrong,'tài khoản',`User name: đổi sang SĐT, biển số xe hoặc tài khoản DSA.`]);
   return g.sort((a,b)=>a[0]-b[0]);
 }
 function todoList(s){
   const g=gaps(s), m=s.margin;
-  if(!g.length) return `<ul class="todo"><li class="okk"><span class="tn">✓</span><span>Đạt cả 4 tiêu chí. Còn được phép thêm <b>${fmt(m.dt_margin)} chuyến hỏng D&T</b> và <b>${fmt(m.pl_margin)} chuyến quá tải</b>.</span></li></ul>`;
-  return `<ul class="todo">${g.map(x=>`<li><span class="tn">${fmt(x[0])}</span><span><b>${x[1]}</b> · ${esc(x[2])}</span></li>`).join('')}</ul>`;
-}
-function tile(c,s,all,track){
-  const ok=c.ok(s)==='PASS';
-  let bar='';
-  if(c.bar){const [v,t]=c.bar(s);bar=`<div class="bar" aria-hidden="true"><b style="width:${Math.min(100,(v||0)/(t*3)*100)}%;background:${ok?'var(--good)':'var(--crit)'}"></b><i style="left:33.3%"></i></div>`;}
-  const npass=all?DATA.scorecard.filter(x=>c.ok(x)==='PASS').length:null;
-  return `<button type="button" class="kpi ${track?'':(ok?'ok':'no')}" data-kpi="${c.k}">
-    <div class="kh"><span class="kn">${c.n}</span>${track?trkChip(c.ok(s)):chip(c.ok(s))}</div>
-    <div class="kv">${c.v(s)}</div>${bar}
-    <div class="kt">${esc(c.th)}${all?` · <b>${npass}/${NPPS.length}</b> NPP ${track?'trong ngưỡng':'đạt'}`:''}</div>
-    <div class="kt">${esc(c.sub(s))}</div></button>`;
+  if(!g.length) return `<ul class="todo"><li class="okk"><span class="tn">✓</span><span>Đạt cả 4 tiêu chí. Dư địa: ${fmt(m.dt_margin)} chuyến lỗi D&T, ${fmt(m.pl_margin)} chuyến quá tải.</span></li></ul>`;
+  return `<ul class="todo">${g.map(x=>`<li><span class="tn">${fmt(x[0])}<small>${x[1]}</small></span><span>${esc(x[2])}</span></li>`).join('')}</ul>`;
 }
 
-/* ---------------- trang: Tổng quan ---------------- */
+/* ---------------- Tổng quan ---------------- */
 function pOverview(){
   const s=curS(), all=scope==='ALL';
   let h='';
   if(all){
     const np=DATA.scorecard.filter(x=>x.overall==='PASS').length;
-    h+=`<section class="card"><div class="verdict"><div class="vbig ${np?'pass':'fail'}">${np}<small>/${NPPS.length} NPP</small></div>
-      <div class="vtext"><h2>đạt Data Accuracy tháng</h2>
-      <p class="cap">Kỳ ${esc(DATA.meta.period)} · ${fmt(DATA.meta.orders)} đơn · ${fmt(DATA.meta.plans)} chuyến. Đạt khi qua cả 4 tiêu chí: Payload, Distance & Time, Created Date, User name. Geo, On time và On time 24H chỉ để theo dõi.</p>
-      <div class="npps">${DATA.scorecard.map(x=>`<button type="button" class="npill" data-npp="${x.npp}"><i style="background:${x.overall==='PASS'?'var(--good)':'var(--crit)'}"></i>${x.npp}<span class="cap" style="margin:0;font-weight:400">${x.n_fail?'trượt '+x.n_fail:'đạt'}</span></button>`).join('')}</div></div></div></section>`;
+    h+=`<section class="card"><div class="hero">${ring(np,NPPS.length)}
+      <div style="display:grid;gap:6px;min-width:0"><div class="lbl">Data Accuracy · ${esc(DATA.meta.period)}</div>
+      <h2>${np} trên ${NPPS.length} NPP đạt kết quả tháng</h2>
+      <p class="sub">${fmt(DATA.meta.orders)} đơn · ${fmt(DATA.meta.plans)} chuyến. Đạt khi qua cả 4 tiêu chí.</p>
+      <div class="npps">${DATA.scorecard.map(x=>`<button type="button" class="npill ${x.overall==='PASS'?'ok':'no'}" data-npp="${x.npp}"><b>${x.npp}</b><span>${x.overall==='PASS'?'✓ Đạt':'✕ Trượt '+x.n_fail}</span></button>`).join('')}</div></div></div></section>`;
   } else {
-    const inf=DATA.npp_info[scope];
-    h+=`<section class="card"><div class="verdict"><div class="vbig ${s.overall==='PASS'?'pass':'fail'}">${s.overall==='PASS'?'ĐẠT':'KHÔNG ĐẠT'}</div>
-      <div class="vtext"><h2>NPP ${esc(scope)} · ${esc(inf.name)}</h2>
-      <p class="cap">${esc(inf.area)} · ${esc(inf.region)} · ${fmt(s.orders)} đơn · ${fmt(s.plans)} chuyến · ${s.n_fail?`trượt <b>${s.n_fail}</b>/4 tiêu chí, mất 15% DIP`:'đạt cả 4 tiêu chí, nhận 15% DIP'}.</p></div></div></section>`;
+    const inf=DATA.npp_info[scope], ok=s.overall==='PASS';
+    h+=`<section class="card"><div class="hero"><div class="verdict ${ok?'':''}" style="color:${ok?'var(--good)':'var(--crit)'}">${ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT'}</div>
+      <div style="display:grid;gap:4px;min-width:0"><div class="lbl">NPP ${esc(scope)} · ${esc(DATA.meta.period)}</div><h2>${esc(inf.name)}</h2>
+      <p class="sub">${esc(inf.area)} · ${fmt(s.orders)} đơn · ${fmt(s.plans)} chuyến${s.n_fail?` · trượt ${s.n_fail}/4 tiêu chí`:''}</p></div></div></section>`;
   }
-  h+=`<section class="card"><div><h2>Kết quả 4 tiêu chí Data Accuracy</h2><p class="cap">Phải đạt cả 4 mới tính là đạt tháng. Bấm một ô để xem chi tiết và danh sách lỗi.</p></div><div class="kpis">${DA.map(c=>tile(c,s,all,false)).join('')}</div></section>`;
-  h+=`<section class="card"><div><h2>Theo dõi — không tính vào kết quả</h2><p class="cap">Các chỉ số này giúp NPP theo dõi chất lượng giao hàng. Ngưỡng ghi trên ô chỉ để tham chiếu.</p></div><div class="kpis">${TRK.map(c=>tile(c,s,all,true)).join('')}</div></section>`;
+  h+=`<section class="card"><div class="ch"><div><h2>4 tiêu chí xét kết quả</h2><p class="sub">Trượt 1 tiêu chí là không đạt tháng.</p></div></div><div class="kpis">${DA.map(c=>tile(c,s,all,false)).join('')}</div></section>`;
+  h+=`<section class="card"><div class="ch"><div><h2>Chỉ số theo dõi</h2><p class="sub">Không tính vào kết quả tháng.</p></div></div><div class="kpis">${TRK.map(c=>tile(c,s,all,true)).join('')}</div></section>`;
   if(all){
-    const head=[['NPP'],['Payload','n'],['D&T','n'],['Created Date','n'],['User sai','n'],['Kết quả'],['Geo','n'],['On time','n'],['24H','n'],['Chuyến lỗi >'+T_PLAN+'%','n']];
-    const cell=(ok,v,trk)=>`<td class="n ${trk?'':(ok==='PASS'?'cok':'cno')}">${v}</td>`;
-    const rw=(x,tot)=>cell(tot?'':x.v_payload,pc(x.payload_fail_pct))+cell(tot?'':x.v_dt,pc(x.dt_route_fail_pct))+cell(tot?'':x.v_created,fmt(x.cd_routes_fail))+cell(tot?'':x.v_username,fmt(x.users_wrong));
+    const cell=(v,ok)=>`<td class="n ${ok==null?'':(ok==='PASS'?'cok':'cno')}">${v}</td>`;
+    const rw=(x,tot)=>cell(pc(x.payload_fail_pct),tot?null:x.v_payload)+cell(pc(x.dt_route_fail_pct),tot?null:x.v_dt)+cell(fmt(x.cd_routes_fail),tot?null:x.v_created)+cell(fmt(x.users_wrong),tot?null:x.v_username);
     const trk=x=>`<td class="n">${pc(x.geo_pct,1)}</td><td class="n">${pc(x.ot_pct,1)}</td><td class="n">${pc(x.t24_pct,1)}</td><td class="n">${pc(x.plan_fail_pct,1)}</td>`;
-    const rows=DATA.scorecard.map(x=>`<tr class="click" data-npp="${x.npp}"><th scope="row">${x.npp}</th>${rw(x)}<td>${chip(x.overall)}</td>${trk(x)}</tr>`);
-    rows.push(`<tr><th scope="row">TỔNG</th>${rw(DATA.total,true).replace(/ c(ok|no)/g,'')}<td></td>${trk(DATA.total)}</tr>`);
-    h+=`<section class="card"><div><h2>Bảng điểm theo nhà phân phối</h2><p class="cap">Payload và D&T ghi tỷ lệ chuyến lỗi; Created Date ghi số chuyến lỗi; User sai ghi số tài khoản sai. Ô đỏ là tiêu chí không đạt. Bốn cột cuối chỉ để theo dõi. Bấm một dòng để xem riêng NPP đó.</p></div>${table(head,rows,{cls:'matrix'})}</section>`;
+    const rows=DATA.scorecard.map(x=>`<tr class="click" data-npp="${x.npp}"><th scope="row">${x.npp}</th><td>${chip(x.overall)}</td>${rw(x)}${trk(x)}</tr>`);
+    rows.push(`<tr class="tot"><th scope="row">Tổng</th><td></td>${rw(DATA.total,true)}${trk(DATA.total)}</tr>`);
+    h+=`<section class="card"><div class="ch"><div><h2>Bảng điểm NPP</h2><p class="sub">Bấm một dòng để xem riêng NPP.</p></div></div>${table([['NPP'],['Kết quả'],['Payload','n'],['D&T','n'],['Created Date','n'],['User sai','n'],['Geo','n'],['On time','n'],['24H','n'],[`Chuyến lỗi`,'n']],rows)}
+      <p class="sub">Payload, D&T: % chuyến lỗi · Created Date: số chuyến lỗi · User sai: số tài khoản. 4 cột cuối chỉ theo dõi.</p></section>`;
     const fails=DATA.scorecard.filter(x=>x.overall==='FAIL');
-    if(fails.length) h+=`<section class="card"><div><h2>Việc cần làm — nhẹ nhất trước</h2><p class="cap">Số chuyến hoặc tài khoản còn phải xử lý để đạt, theo từng NPP chưa đạt.</p></div>
-      <div class="grid2" style="align-items:start">${fails.map(x=>`<div style="display:grid;gap:8px;align-content:start"><h3>${x.npp}</h3>${todoList(x)}</div>`).join('')}</div></section>`;
+    if(fails.length) h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Phần còn thiếu để đạt, việc nhẹ nhất trước.</p></div></div>
+      <div class="grid2">${fails.map(x=>`<div style="display:grid;gap:8px"><h3>${x.npp}</h3>${todoList(x)}</div>`).join('')}</div></section>`;
   } else {
-    h+=`<section class="card"><div><h2>Việc cần làm — nhẹ nhất trước</h2><p class="cap">Còn thiếu đúng bao nhiêu chuyến hoặc tài khoản để đạt.</p></div>${todoList(s)}</section>`;
+    h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Phần còn thiếu để đạt, việc nhẹ nhất trước.</p></div></div>${todoList(s)}</section>`;
     const us=DATA.users.ALL.filter(u=>u.npp===scope).slice(0,15);
-    h+=`<section class="card"><div><h2>Tài khoản giao hàng có nhiều đơn lỗi</h2><p class="cap">Gồm cả lỗi tính vào kết quả (D&T, Payload, Created Date) và lỗi theo dõi (Geo, On time). Bấm một tài khoản để xem các đơn lỗi.</p></div>${
+    h+=`<section class="card"><div class="ch"><div><h2>Tài khoản nhiều đơn lỗi</h2><p class="sub">Bấm một tài khoản để xem đơn lỗi.</p></div></div>${
       table([['Tài khoản'],['Loại'],['Đơn','n'],['Đơn lỗi','n'],['D&T','n'],['Payload','n'],['Created','n'],['Geo','n'],['On time','n'],['24H','n']],
       us.map(u=>`<tr class="click" data-user="${esc(u.username)}"><td class="mono">${esc(u.username)}</td><td>${esc(u.utype)}</td><td class="n">${fmt(u.orders)}</td><td class="n">${fmt(u.err)}</td><td class="n">${fmt(u.dt)}</td><td class="n">${fmt(u.pl)}</td><td class="n">${fmt(u.cd)}</td><td class="n">${fmt(u.geo)}</td><td class="n">${fmt(u.ot)}</td><td class="n">${fmt(u.t24)}</td></tr>`))}</section>`;
   }
   return h;
 }
 
-/* ---------------- trang: Chi tiết KPI ---------------- */
-function head(c,s,track,extra=''){
-  const all=scope==='ALL';
-  return `<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:start"><div><div class="eyebrow">${all?'Tất cả NPP':'NPP '+esc(scope)} · ${track?'theo dõi, không tính vào kết quả':'tiêu chí Data Accuracy'} · ${esc(c.th)}</div><h2>${c.n}: ${c.v(s)}</h2><p class="cap">${esc(c.sub(s))}${extra}</p></div>${track?trkChip(c.ok(s)):chip(c.ok(s))}</div>`;
+/* ---------------- Chi tiết KPI ---------------- */
+function head(c,s,track){
+  return `<div class="ch"><div><div class="lbl">${scope==='ALL'?'Tất cả NPP':'NPP '+esc(scope)} · ${track?'theo dõi':'xét kết quả'}</div><h2>${c.n}: ${c.v(s).replace(/<small>/,' <small>')}</h2><p class="sub">${esc(c.sub(s))} · ${esc(c.th)}</p></div>${track?trkChip(c.ok(s)):chip(c.ok(s))}</div>`;
 }
 const byNpp=(f,o={})=>hbar(DATA.scorecard.map(x=>({l:x.npp,v:f(x),bad:o.bad?o.bad(x):false})),o);
-function pPlan(){
-  const s=curS(), all=scope==='ALL', c=TRK.find(x=>x.k==='plan');
-  let h=`<section class="card">${head(c,s,true)}
-    ${all?byNpp(x=>x.plan_fail_pct,{thr:T_TOL,bad:x=>x.v_plan==='FAIL'})+'<p class="cap">Đường đứt là mức tham chiếu '+T_TOL+'%. Chỉ số này gộp lỗi của mọi KPI kể cả Geo và On time, nên không dùng để tính kết quả.</p>':''}</section>`;
-  const dr=(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.plan_fail)}</td>${DRV.map(d=>`<td class="n">${fmt(x.plan_drivers[d[0]])}</td>`).join('')}</tr>`);
-  h+=`<section class="card"><div><h2>Loại lỗi có trong chuyến lỗi</h2><p class="cap">Số chuyến lỗi có ít nhất một đơn mang loại lỗi đó. Một chuyến có thể chứa nhiều loại.</p></div>
-    ${table([['NPP'],['Chuyến lỗi','n'],...DRV.map(d=>[d[0],'n'])],dr)}</section>`;
-  const sz=s.plan_sizes;
-  h+=`<section class="card"><div><h2>Tỷ lệ chuyến lỗi theo số đơn của chuyến</h2><p class="cap">Chuyến 1–3 đơn chỉ cần 1 đơn lỗi là vượt ${T_PLAN}%.</p></div>
-    ${vbar(sz.map(x=>({l:x.label,v:x.plans?Math.round(x.fail/x.plans*1000)/10:0})),{fmtv:v=>n1(v)+'%'})}</section>`;
-  const pls=rowsIn(DATA.plan_list), lim=200;
-  h+=`<section class="card"><div><h2>Danh sách chuyến lỗi</h2><p class="cap">${fmt(pls.length)} chuyến${pls.length>lim?`, hiện ${lim} chuyến đầu`:''}. Bấm một chuyến để xem từng đơn lỗi.</p></div>
-    ${table([['Chuyến'],['NPP'],['Ngày'],['Tài khoản'],['Đơn','n'],['Đơn lỗi','n'],['Tỷ lệ lỗi','n'],['Loại lỗi']],pls.slice(0,lim).map(r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td class="mono">${esc(r.date)}</td><td class="mono">${esc(r.user)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${fmt(r.err)}</td><td class="n">${n1(r.ratio)}%</td><td>${esc(r.types)}</td></tr>`))}</section>`;
-  return h;
-}
+const capMax=(f,t)=>Math.max(t*1.5,...DATA.scorecard.map(f))*1.08;
+function sec(title,sub,body){return `<section class="card"><div><h2>${title}</h2>${sub?`<p class="sub">${sub}</p>`:''}</div>${body}</section>`;}
 function pKpi(){
   const s=curS(), all=scope==='ALL';
   if(!DA.concat(TRK).some(c=>c.k===kpiSel)) kpiSel='payload';
-  const segBtn=(c,track)=>`<button type="button" data-ks="${c.k}" class="${c.k===kpiSel?'on':''}" aria-pressed="${c.k===kpiSel}">${track?'':`<i style="background:${c.ok(s)==='PASS'?'var(--good)':'var(--crit)'}"></i>`}${c.n}</button>`;
-  let h=`<div style="display:grid;gap:8px"><div class="seg" role="tablist"><span class="eyebrow" style="align-self:center;min-width:9ch">Tính kết quả</span>${DA.map(c=>segBtn(c,false)).join('')}</div>
-    <div class="seg" role="tablist"><span class="eyebrow" style="align-self:center;min-width:9ch">Theo dõi</span>${TRK.map(c=>segBtn(c,true)).join('')}</div></div>`;
-  const k=kpiSel;
-  if(k==='plan') return h+pPlan();
-  const da=DA.find(c=>c.k===k), c=da||TRK.find(x=>x.k===k), track=!da;
+  const btn=(c,track)=>`<button type="button" data-ks="${c.k}" class="${c.k===kpiSel?'on':''}" aria-pressed="${c.k===kpiSel}">${track?'':`<i style="background:${c.ok(s)==='PASS'?'var(--good)':'var(--crit)'}"></i>`}${c.n}</button>`;
+  let h=`<div class="segs"><div class="seg"><span class="lbl">Xét KQ</span>${DA.map(c=>btn(c,false)).join('')}</div><div class="seg"><span class="lbl">Theo dõi</span>${TRK.map(c=>btn(c,true)).join('')}</div></div>`;
+  const k=kpiSel, da=DA.find(c=>c.k===k), c=da||TRK.find(x=>x.k===k), track=!da;
+  const top=extra=>`<section class="card">${head(c,s,track)}${extra||''}</section>`;
+  const plRow=r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td>${esc(r.date)}</td>`;
   if(k==='payload'){
-    h+=`<section class="card">${head(c,s,false)}${all?byNpp(x=>x.payload_fail_pct,{thr:T_PL,max:Math.max(T_PL*1.4,...DATA.scorecard.map(x=>x.payload_fail_pct)),bad:x=>x.v_payload==='FAIL'})+'<p class="cap">Đường đứt là dung sai '+T_PL+'%.</p>':''}</section>`;
-    const rows=rowsIn(DATA.pl_top).map(r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td>${esc(r.date)}</td><td class="mono">${esc(r.truck)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${n1(r.weight,2)} t</td><td class="n">${n1(r.cap,2)} t</td><td class="n cno">${n1(r.ratio,2)}×</td></tr>`);
-    h+=`<section class="card"><div><h2>Chuyến chở từ ${TH.payload_ratio} lần tải trọng trở lên</h2><p class="cap">Tổng Assigned_Weight của chuyến chia cho TruckCapacityWeight. NPP vẫn đạt nếu số chuyến này dưới ${T_PL}% tổng chuyến, nhưng từng chuyến vẫn được ghi lỗi để theo dõi. Nên kiểm tra tải trọng xe khai trong TMS.</p></div>
-      ${table([['Chuyến'],['NPP'],['Ngày'],['Xe'],['Đơn','n'],['Hàng','n'],['Tải trọng','n'],['Tỷ lệ','n']],rows)}</section>`;
+    h+=top(all?byNpp(x=>x.payload_fail_pct,{thr:T_PL,max:capMax(x=>x.payload_fail_pct,T_PL),bad:x=>x.v_payload==='FAIL'}):'');
+    h+=sec(`Chuyến chở ≥ ${TH.payload_ratio} lần tải trọng`,'Vẫn ghi lỗi để theo dõi dù NPP đạt. Nên kiểm tra tải trọng xe khai trên TMS.',
+      table([['Chuyến'],['NPP'],['Ngày'],['Xe'],['Đơn','n'],['Hàng','n'],['Tải trọng','n'],['Tỷ lệ','n']],rowsIn(DATA.pl_top).map(r=>plRow(r)+`<td class="mono">${esc(r.truck)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${n1(r.weight,2)} t</td><td class="n">${n1(r.cap,2)} t</td><td class="n cno">${n1(r.ratio,2)}×</td></tr>`)));
   }
   if(k==='dt'){
-    h+=`<section class="card">${head(c,s,false)}${all?byNpp(x=>x.dt_route_fail_pct,{thr:T_DT,max:Math.max(T_DT*1.4,...DATA.scorecard.map(x=>x.dt_route_fail_pct)),bad:x=>x.v_dt==='FAIL'})+'<p class="cap">Đường đứt là dung sai '+T_DT+'%.</p>':''}</section>`;
-    const rows=rowsIn(DATA.dt_top).map(r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td>${esc(r.date)}</td><td class="mono">${esc(r.user)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${fmt(r.bad)}</td><td class="n cno">${pc(r.bad/r.orders*100,0)}</td></tr>`);
-    h+=`<section class="card"><div><h2>Chuyến hỏng Distance & Time</h2><p class="cap">Đơn lỗi khi xác nhận cách outlet liền trước dưới ${TH.dt_gap_min} phút trong khi hai outlet cách nhau trên ${TH.dt_dist_min}m. Chuyến hỏng khi số đơn đúng dưới ${100-TH.dt_route_pct*100}% (tức trên ${TH.dt_route_pct*100}% đơn lỗi). Bấm một chuyến để xem từng đơn.</p></div>
-      ${table([['Chuyến'],['NPP'],['Ngày'],['Tài khoản'],['Đơn','n'],['Đơn lỗi','n'],['Tỷ lệ lỗi','n']],rows)}</section>`;
+    h+=top(all?byNpp(x=>x.dt_route_fail_pct,{thr:T_DT,max:capMax(x=>x.dt_route_fail_pct,T_DT),bad:x=>x.v_dt==='FAIL'}):'');
+    h+=sec('Chuyến lỗi Distance & Time',`Đơn lỗi: cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi.`,
+      table([['Chuyến'],['NPP'],['Ngày'],['Tài khoản'],['Đơn','n'],['Đơn lỗi','n'],['Tỷ lệ','n']],rowsIn(DATA.dt_top).map(r=>plRow(r)+`<td class="mono">${esc(r.user)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${fmt(r.bad)}</td><td class="n cno">${pc(r.bad/r.orders*100,0)}</td></tr>`)));
   }
   if(k==='created'){
-    h+=`<section class="card">${head(c,s,false)}${all?byNpp(x=>x.cd_routes_fail,{fmtv:v=>fmt(v)+' chuyến',max:Math.max(1,...DATA.scorecard.map(x=>x.cd_routes_fail))*1.2,bad:x=>x.cd_routes_fail>0}):''}</section>`;
-    const rows=rowsIn(DATA.cd_list).map(r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.order)}</td><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td class="mono">${esc(r.user)}</td><td class="mono">${esc(r.created)}</td><td class="mono">${esc(r.delivered)}</td><td class="n cno">${r.hours>=24?n1(r.hours/24)+' ngày':n1(r.hours)+' giờ'}</td></tr>`);
-    h+=`<section class="card"><div><h2>Đơn tạo sau khi đã giao</h2><p class="cap">Created Date = <code>Sent_To_distributor</code> trong file Fill Rate, ghép theo <code>DocNo = OrderNumber</code>. Đơn lỗi khi thời điểm tạo muộn hơn <code>DeliverDateTime</code>. Chỉ cần 1 đơn lỗi là chuyến lỗi; chỉ cần 1 chuyến lỗi là NPP trượt tiêu chí này.</p></div>
-      ${table([['Đơn'],['Chuyến'],['NPP'],['Tài khoản'],['Tạo lúc'],['Giao lúc'],['Tạo sau giao','n']],rows)}</section>`;
+    h+=top(all?byNpp(x=>x.cd_routes_fail,{fmtv:v=>fmt(v)+' chuyến',max:Math.max(1,...DATA.scorecard.map(x=>x.cd_routes_fail))*1.25,bad:x=>x.cd_routes_fail>0}):'');
+    h+=sec('Đơn tạo sau khi giao','Created Date lấy từ <code>Sent_To_distributor</code> (Fill Rate), ghép <code>DocNo = OrderNumber</code>. 1 đơn lỗi là chuyến lỗi.',
+      table([['Đơn'],['Chuyến'],['NPP'],['Tài khoản'],['Tạo lúc'],['Giao lúc'],['Chênh','n']],rowsIn(DATA.cd_list).map(r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.order)}</td><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td class="mono">${esc(r.user)}</td><td class="mono">${esc(r.created)}</td><td class="mono">${esc(r.delivered)}</td><td class="n cno">${r.hours>=24?n1(r.hours/24)+' ngày':n1(r.hours)+' giờ'}</td></tr>`)));
   }
   if(k==='username'){
-    h+=`<section class="card">${head(c,s,false)}</section>`;
-    const rows=(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.users_total)}</td>${['DSA','SĐT tài xế','Biển số xe'].map(t=>`<td class="n">${fmt(x.user_types[t]||0)}</td>`).join('')}<td class="n ${x.users_wrong?'cno':''}">${fmt(x.users_wrong)}</td><td class="mono">${esc(x.users_wrong_list.join(', '))||'—'}</td></tr>`);
-    h+=`<section class="card"><div><h2>Tài khoản giao hàng</h2><p class="cap">Hợp lệ khi là tài khoản kho (chứa "DSA"), số điện thoại 10 số bắt đầu bằng 0, hoặc biển số xe. Đếm theo từng tài khoản khác nhau; ba cột giữa đếm số đơn theo loại tài khoản.</p></div>
-      ${table([['NPP'],['Tài khoản','n'],['Đơn DSA','n'],['Đơn SĐT','n'],['Đơn biển số','n'],['Tài khoản sai','n'],['Danh sách sai']],rows)}</section>`;
+    h+=top();
+    h+=sec('Tài khoản giao hàng','Hợp lệ: SĐT 10 số, biển số xe, hoặc tài khoản DSA.',
+      table([['NPP'],['Tài khoản','n'],['Đơn DSA','n'],['Đơn SĐT','n'],['Đơn biển số','n'],['Sai','n'],['Danh sách sai']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.users_total)}</td>${['DSA','SĐT tài xế','Biển số xe'].map(t=>`<td class="n">${fmt(x.user_types[t]||0)}</td>`).join('')}<td class="n ${x.users_wrong?'cno':''}">${fmt(x.users_wrong)}</td><td class="mono">${esc(x.users_wrong_list.join(', '))||'—'}</td></tr>`)));
   }
   if(k==='geo'){
-    h+=`<section class="card">${head(c,s,true)}${all?byNpp(x=>x.geo_pct,{thr:TH.geo,max:100,bad:x=>x.v_geo==='FAIL'})+'<p class="cap">Đường đứt là mức tham chiếu '+TH.geo+'%.</p>':''}</section>`;
-    const brk=(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.geo_scope)}</td><td class="n">${fmt(x.geo_excluded)}</td><td class="n">${fmt(x.geo_fail)}</td><td class="n">${fmt(x.geo_v)}</td><td class="n">${fmt(x.geo_w)}</td><td class="n">${fmt(x.geo_x)}</td><td class="n">${pc(x.geo_pct)}</td></tr>`);
-    h+=`<section class="card"><div><h2>Đơn lỗi Geo theo điều kiện</h2><p class="cap">Đơn lỗi khi trượt ít nhất 1 trong 3 điều kiện, nên tổng 3 cột điều kiện lớn hơn số đơn lỗi.</p></div>
-      ${table([['NPP'],['Đơn tính','n'],['Loại (DSA)','n'],['Đơn lỗi','n'],['(1) Lệch >'+TH.geo_radius_m+'m','n'],['(2) ≤'+TH.geo_gap_min+' phút','n'],['(3) Ngoài giờ','n'],['Tỷ lệ đạt','n']],brk)}</section>`;
+    h+=top(all?byNpp(x=>x.geo_pct,{thr:TH.geo,max:100,bad:x=>x.v_geo==='FAIL'}):'');
+    h+=sec('Đơn lỗi Geo theo điều kiện','Một đơn có thể trượt nhiều điều kiện. Không tính đơn tài khoản DSA.',
+      table([['NPP'],['Đơn xét','n'],['Đơn lỗi','n'],[`Lệch > ${TH.geo_radius_m}m`,'n'],[`≤ ${TH.geo_gap_min} phút`,'n'],['Ngoài giờ','n'],['Tỷ lệ đạt','n']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.geo_scope)}</td><td class="n">${fmt(x.geo_fail)}</td><td class="n">${fmt(x.geo_v)}</td><td class="n">${fmt(x.geo_w)}</td><td class="n">${fmt(x.geo_x)}</td><td class="n">${pc(x.geo_pct)}</td></tr>`)));
     const gd=DATA.geo_dist[scope], hr=DATA.hours[scope];
-    h+=`<div class="grid2"><section class="card"><div><h2>Khoảng lệch vị trí khi xác nhận</h2><p class="cap">Chỉ nhóm 0–50m đạt điều kiện (1).</p></div>${vbar(gd.map(g=>({l:g.label,v:g.n})),{hl:it=>it.l!=='0–50m'})}</section>
-      <section class="card"><div><h2>Giờ hoàn tất giao hàng</h2><p class="cap">Cột đỏ nằm ngoài khung ${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00.</p></div>${vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>{const hh=parseInt(it.l);return hh<TH.work_start||hh>=TH.work_end;}})}</section></div>`;
-  }
-  if(k==='h24'){
-    h+=`<section class="card">${head(c,s,true)}${all?byNpp(x=>x.t24_pct,{thr:TH.ontime,max:100,bad:x=>x.v_24==='FAIL'})+'<p class="cap">Đường đứt là mức tham chiếu '+TH.ontime+'%.</p>':''}</section>`;
-    const rows=(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.t24_scope)}</td><td class="n">${fmt(x.t24_fail)}</td><td class="n">${fmt(x.h24_fail)}</td><td class="n">${fmt(x.wh_fail)}</td><td class="n">${fmt(x.h24_na)}</td><td class="n">${pc(x.t24_pct)}</td></tr>`);
-    h+=`<section class="card"><div><h2>Đơn lỗi 24H theo nguyên nhân</h2><p class="cap">Đơn lỗi khi quá ${TH.sla_hours} giờ tính SLA hoặc giao sau ${TH.wh_end}:00:00. Một đơn có thể mắc cả hai nên cộng hai cột lớn hơn số đơn lỗi. "Không xét" là đơn thiếu giờ tạo hoặc giờ giao.</p></div>
-      ${table([['NPP'],['Đơn xét','n'],['Đơn lỗi','n'],['Quá 24H','n'],['Sau '+TH.wh_end+':00','n'],['Không xét','n'],['Tỷ lệ đạt','n']],rows)}</section>`;
-    const L=['Âm','0–12 giờ','12–24 giờ','24–48 giờ','48–72 giờ','> 72 giờ'];
-    const hr=DATA.hours[scope];
-    h+=`<div class="grid2"><section class="card"><div><h2>Thời gian giao tính SLA</h2><p class="cap">Sau khi quy đổi giờ chốt 17:00 và trừ Chủ nhật. "Âm" là đơn tạo sau khi giao. Cột đỏ là lỗi.</p></div>${vbar(s.h24_bins.map((v,i)=>({l:L[i],v})),{hl:it=>it.l.startsWith('Âm')||parseInt(it.l)>=24||it.l.startsWith('>')})}</section>
-      <section class="card"><div><h2>Giờ hoàn tất giao hàng</h2><p class="cap">Cột đỏ là giao từ ${TH.wh_end}h trở đi (lỗi Working Hour khi sau đúng ${TH.wh_end}:00:00).</p></div>${vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>parseInt(it.l)>=TH.wh_end})}</section></div>`;
+    h+=`<div class="grid2">${sec('Khoảng lệch vị trí','Chỉ nhóm 0–50m đạt.',vbar(gd.map(g=>({l:g.label,v:g.n})),{hl:it=>it.l!=='0–50m'}))}
+      ${sec('Giờ hoàn tất',`Cột đỏ: ngoài ${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00.`,vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>{const hh=parseInt(it.l);return hh<TH.work_start||hh>=TH.work_end;}}))}</div>`;
   }
   if(k==='ontime'){
-    h+=`<section class="card">${head(c,s,true)}${all?byNpp(x=>x.ot_pct,{thr:TH.ontime,max:100,bad:x=>x.v_ontime==='FAIL'}):''}</section>`;
-    const late={};ERR.filter(e=>(scope==='ALL'||e.TenantName===scope)&&e.loi.includes('On time')).forEach(e=>{const m=/trễ hạn (\d+) ngày/.exec(e.ly_do);const key=m?m[1]+' ngày':(/chưa có giờ giao/.test(e.ly_do)?'Chưa có giờ giao':'Cùng ngày hứa');late[key]=(late[key]||0)+1;});
+    h+=top(all?byNpp(x=>x.ot_pct,{thr:TH.ontime,max:100,bad:x=>x.v_ontime==='FAIL'}):'');
+    const late={};ERR.filter(e=>(scope==='ALL'||e.TenantName===scope)&&e.loi.split(' + ').includes('On time')).forEach(e=>{const m=/trễ hạn (\d+) ngày/.exec(e.ly_do);const key=m?m[1]+' ngày':(/chưa có giờ giao/.test(e.ly_do)?'Thiếu giờ giao':'Trong ngày hứa');late[key]=(late[key]||0)+1;});
     const lk=Object.keys(late).sort((a,b)=>(parseInt(a)||99)-(parseInt(b)||99));
-    h+=`<section class="card"><div><h2>Đơn trễ theo mức trễ</h2><p class="cap">So ngày giao thực tế với ngày hứa (PromisedDate). "Cùng ngày hứa" là đơn TMS chấm trễ theo SLA giờ dù giao trong ngày hứa. Successful hiện dùng chung kết quả On time.</p></div>${vbar(lk.map(x=>({l:x,v:late[x]})),{color:'var(--crit)'})}</section>`;
+    h+=sec('Đơn trễ theo số ngày','So với PromisedDate. "Trong ngày hứa": TMS chấm trễ theo SLA giờ. Successful dùng chung kết quả này.',vbar(lk.map(x=>({l:x,v:late[x]})),{color:'var(--crit)'}));
+  }
+  if(k==='h24'){
+    h+=top(all?byNpp(x=>x.t24_pct,{thr:TH.ontime,max:100,bad:x=>x.v_24==='FAIL'}):'');
+    h+=sec('Đơn lỗi 24H theo nguyên nhân',`Lỗi khi quá ${TH.sla_hours} giờ SLA hoặc giao sau ${TH.wh_end}:00. "Không xét": thiếu giờ tạo hoặc giờ giao.`,
+      table([['NPP'],['Đơn xét','n'],['Đơn lỗi','n'],['Quá 24H','n'],[`Sau ${TH.wh_end}:00`,'n'],['Không xét','n'],['Tỷ lệ đạt','n']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.t24_scope)}</td><td class="n">${fmt(x.t24_fail)}</td><td class="n">${fmt(x.h24_fail)}</td><td class="n">${fmt(x.wh_fail)}</td><td class="n">${fmt(x.h24_na)}</td><td class="n">${pc(x.t24_pct)}</td></tr>`)));
+    const L=['Âm','0–12h','12–24h','24–48h','48–72h','> 72h'], hr=DATA.hours[scope];
+    h+=`<div class="grid2">${sec('Thời gian giao tính SLA','Đã quy đổi mốc 17:00 và trừ Chủ nhật. "Âm": tạo sau khi giao.',vbar(s.h24_bins.map((v,i)=>({l:L[i],v})),{hl:it=>it.l==='Âm'||it.l.startsWith('24')||it.l.startsWith('48')||it.l.startsWith('>')}))}
+      ${sec('Giờ hoàn tất',`Cột đỏ: từ ${TH.wh_end}h trở đi.`,vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>parseInt(it.l)>=TH.wh_end}))}</div>`;
+  }
+  if(k==='plan'){
+    h+=top(all?byNpp(x=>x.plan_fail_pct,{thr:T_TOL,bad:x=>x.v_plan==='FAIL'}):'');
+    h+=sec('Loại lỗi trong chuyến lỗi','Số chuyến lỗi có chứa loại lỗi đó. Một chuyến có thể chứa nhiều loại.',
+      table([['NPP'],['Chuyến lỗi','n'],...DRV.map(d=>[d[0],'n'])],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.plan_fail)}</td>${DRV.map(d=>`<td class="n">${fmt(x.plan_drivers[d[0]])}</td>`).join('')}</tr>`)));
+    const pls=rowsIn(DATA.plan_list), lim=200;
+    h+=sec('Danh sách chuyến lỗi',`${fmt(pls.length)} chuyến${pls.length>lim?`, hiện ${lim} chuyến đầu`:''}. Bấm để xem đơn.`,
+      table([['Chuyến'],['NPP'],['Ngày'],['Tài khoản'],['Đơn','n'],['Đơn lỗi','n'],['Tỷ lệ','n'],['Loại lỗi']],pls.slice(0,lim).map(r=>plRow(r)+`<td class="mono">${esc(r.user)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${fmt(r.err)}</td><td class="n">${n1(r.ratio)}%</td><td>${esc(r.types)}</td></tr>`)));
   }
   return h;
 }
 
-/* ---------------- trang: Xu hướng ---------------- */
+/* ---------------- Xu hướng ---------------- */
 function pTrend(){
-  const d=DATA.daily[scope];
-  const days=d.map(x=>x.day);
-  let h=`<section class="card"><div><h2>Tỷ lệ chuyến hỏng Distance & Time theo ngày</h2><p class="cap">Cột đỏ là ngày vượt ${T_DT}%. Dung sai được xét trên cả tháng; biểu đồ giúp tìm ngày kéo kết quả xuống.</p></div>
-    ${vbar(d.map(x=>({l:x.day,v:x.dtr_pct??0})),{fmtv:v=>n1(v)+'%',hl:it=>it.v>=T_DT})}</section>`;
-  h+=`<section class="card"><div><h2>Chỉ số theo dõi theo ngày</h2><p class="cap">Tỷ lệ đơn đạt Geo, On time và On time 24H. Trục dọc bắt đầu từ 50%.</p></div>
-    <div class="legend"><span><i style="background:var(--accent)"></i>Geo Compliance</span><span><i style="background:var(--good)"></i>On time</span><span><i style="background:var(--warn)"></i>On time 24H</span></div>
-    ${lines(days,[{n:'Geo',v:d.map(x=>x.geo),c:'var(--accent)'},{n:'On time',v:d.map(x=>x.ot),c:'var(--good)'},{n:'24H',v:d.map(x=>x.t24),c:'var(--warn)'}],{min:50})}</section>`;
-  h+=`<section class="card"><div><h2>Số liệu từng ngày</h2><p class="cap">Bấm một ngày để xem các đơn lỗi của ngày đó.</p></div>
-    ${table([['Ngày'],['Chuyến','n'],['Chuyến hỏng D&T','n'],['% hỏng D&T','n'],['Đơn Created Date lỗi','n'],['Đơn','n'],['Đơn lỗi','n'],['Geo','n'],['On time','n'],['24H','n']],d.map(x=>`<tr class="click" data-day="${x.day}"><td class="mono">${x.day}</td><td class="n">${fmt(x.plans)}</td><td class="n">${fmt(x.dtr)}</td><td class="n ${x.dtr_pct>=T_DT?'cno':''}">${pc(x.dtr_pct,1)}</td><td class="n ${x.cd?'cno':''}">${fmt(x.cd)}</td><td class="n">${fmt(x.orders)}</td><td class="n">${fmt(x.err)}</td><td class="n">${pc(x.geo,1)}</td><td class="n">${pc(x.ot,1)}</td><td class="n">${pc(x.t24,1)}</td></tr>`))}</section>`;
+  const d=DATA.daily[scope], days=d.map(x=>x.day);
+  let h=sec('Chuyến lỗi Distance & Time theo ngày',`Cột đỏ: ngày ≥ ${T_DT}%. Ngưỡng xét trên cả tháng.`,vbar(d.map(x=>({l:x.day,v:x.dtr_pct??0})),{fmtv:v=>n1(v)+'%',hl:it=>it.v>=T_DT}));
+  h+=sec('Chỉ số theo dõi theo ngày','Tỷ lệ đơn đạt. Trục dọc từ 50%.',
+    `<div class="legend"><span><i style="background:var(--s1)"></i>Geo Compliance</span><span><i style="background:var(--s2)"></i>On time</span><span><i style="background:var(--s3)"></i>On time 24H</span></div>`+
+    lines(days,[{n:'Geo',v:d.map(x=>x.geo),c:'var(--s1)'},{n:'On time',v:d.map(x=>x.ot),c:'var(--s2)'},{n:'24H',v:d.map(x=>x.t24),c:'var(--s3)'}]));
+  h+=sec('Số liệu theo ngày','Bấm một ngày để xem đơn lỗi.',
+    table([['Ngày'],['Chuyến','n'],['Lỗi D&T','n'],['% D&T','n'],['Created lỗi','n'],['Đơn','n'],['Đơn lỗi','n'],['Geo','n'],['On time','n'],['24H','n']],d.map(x=>`<tr class="click" data-day="${x.day}"><td>${x.day}</td><td class="n">${fmt(x.plans)}</td><td class="n">${fmt(x.dtr)}</td><td class="n ${x.dtr_pct>=T_DT?'cno':''}">${pc(x.dtr_pct,1)}</td><td class="n ${x.cd?'cno':''}">${fmt(x.cd)}</td><td class="n">${fmt(x.orders)}</td><td class="n">${fmt(x.err)}</td><td class="n">${pc(x.geo,1)}</td><td class="n">${pc(x.ot,1)}</td><td class="n">${pc(x.t24,1)}</td></tr>`)));
   return h;
 }
 
-/* ---------------- trang: Đơn hàng có lỗi ---------------- */
-const TYPES=['D&T','Payload','Created Date','User','Geo','On time','24H'];
+/* ---------------- Đơn lỗi ---------------- */
+const TYPES=['D&T','Payload','Created Date','User','Geo','On time','24H'], TRK_T=['Geo','On time','24H'];
 function filtered(){
   const q=EF.q.trim().toLowerCase();
   return ERR.filter(e=>(scope==='ALL'||e.TenantName===scope)&&(!EF.npp||e.TenantName===EF.npp)&&
@@ -490,27 +497,25 @@ function filtered(){
 }
 function pErrors(){
   const rows=filtered(), ps=50, pages=Math.max(1,Math.ceil(rows.length/ps)); epage=Math.min(epage,pages);
-  const days=[...new Set(DATA.daily.ALL.map(x=>x.day))];
+  const days=DATA.daily.ALL.map(x=>x.day);
   const cnt=t=>ERR.filter(e=>(scope==='ALL'||e.TenantName===scope)&&e.loi.split(' + ').includes(t)).length;
-  let h=`<section class="card"><div><h2>Đơn hàng có lỗi</h2><p class="cap">${fmt(rows.length)} đơn khớp bộ lọc. Mỗi đơn có thể mang nhiều nhãn lỗi; cột lý do ghi con số gây ra lỗi.</p></div>
+  let h=`<section class="card"><div class="ch"><div><h2>Đơn lỗi</h2><p class="sub">${fmt(rows.length)} đơn. Nhãn đỏ: xét kết quả · nhãn xám: theo dõi.</p></div>
+    <div style="display:flex;gap:8px"><button class="btn sm" type="button" id="xlsx">Tải Excel</button><button class="btn sm" type="button" id="csv">Tải CSV</button></div></div>
   <div class="filters">
-    <div class="field"><label for="fq">Tìm đơn, chuyến, tài khoản, outlet</label><input type="search" id="fq" value="${esc(EF.q)}" placeholder="VD: PL01449113"></div>
+    <div class="field"><label for="fq">Tìm kiếm</label><input type="search" id="fq" value="${esc(EF.q)}" placeholder="Đơn, chuyến, tài khoản, outlet"></div>
     <div class="field"><label for="ft">Loại lỗi</label><select id="ft"><option value="">Tất cả</option>${TYPES.map(t=>`<option ${EF.type===t?'selected':''} value="${t}">${t} (${fmt(cnt(t))})</option>`).join('')}</select></div>
     ${scope==='ALL'?`<div class="field"><label for="fn">NPP</label><select id="fn"><option value="">Tất cả</option>${NPPS.map(n=>`<option ${EF.npp===n?'selected':''}>${n}</option>`).join('')}</select></div>`:''}
     <div class="field"><label for="fd">Ngày</label><select id="fd"><option value="">Tất cả</option>${days.map(d=>`<option ${EF.day===d?'selected':''}>${d}</option>`).join('')}</select></div>
-    <label style="display:inline-flex;gap:6px;align-items:center;padding-bottom:6px"><input type="checkbox" id="fpf" ${EF.pf?'checked':''}> Chỉ đơn thuộc chuyến lỗi &gt;30% (theo dõi)</label>
+    <label class="check"><input type="checkbox" id="fpf" ${EF.pf?'checked':''}> Chỉ chuyến lỗi &gt; ${T_PLAN}%</label>
     <button class="btn sm" type="button" id="fclear">Xoá lọc</button>
-    <span style="flex:1"></span>
-    <button class="btn sm" type="button" id="xlsx" data-dl>Tải Excel</button>
-    <button class="btn sm" type="button" id="csv" data-dl>Tải CSV</button>
   </div>`;
   const slice=rows.slice((epage-1)*ps,epage*ps);
-  h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Outlet'],['Tài khoản'],['Giao lúc'],['Lệch (m)','n'],['Cách trước (phút)','n'],['Lỗi'],['Lý do']],
-    slice.map(e=>`<tr><td class="mono">${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}<br>${e.plan_fail?`<span class="chip no">${n1(e.plan_err_ratio*100,0)}% lỗi</span>`:`<span class="chip na">${n1(e.plan_err_ratio*100,0)}% lỗi</span>`}</td><td class="mono">${esc(e.OrderNumber)}</td><td class="mono">${esc(e.OutletCode)}</td><td class="mono">${esc(e.username)}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td class="n">${fmt(Math.round(e.distance_to_dropped??0))}</td><td class="n">${e.gap==null?'—':n1(e.gap)}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${['Geo','On time','24H'].includes(t)?'na':'no'}">${esc(t)}</span>`).join(' ')}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
+  h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Tài khoản'],['Giao lúc'],['Lỗi'],['Chi tiết']],
+    slice.map(e=>`<tr><td>${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}</td><td class="mono">${esc(e.OrderNumber)}<br><span class="sub">Outlet ${esc(e.OutletCode)}</span></td><td class="mono">${esc(e.username)}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${TRK_T.includes(t)?'na':'no'}">${esc(t)}</span>`).join(' ')}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
   h+=`<div class="pager"><button class="btn sm" type="button" id="pprev" ${epage<=1?'disabled':''}>← Trước</button><span>Trang ${epage}/${pages}</span><button class="btn sm" type="button" id="pnext" ${epage>=pages?'disabled':''}>Sau →</button></div></section>`;
   return h;
 }
-const XCOLS=[['Date','Ngày'],['TenantName','NPP'],['PlanNumber','Chuyến'],['OrderNumber','Đơn'],['OutletCode','Outlet'],['username','Tài khoản'],['utype','Loại tài khoản'],['DriverName','Tài xế/Xe'],['Status','Trạng thái'],['Sent_To_distributor','Created Date (Fill Rate)'],['DeliverDateTime','Giao lúc'],['PromisedDate','Ngày hứa'],['distance_to_dropped','Lệch vị trí (m)'],['gap','Cách outlet trước (phút)'],['seq','Thứ tự trong chuyến'],['plan_orders','Số đơn của chuyến'],['plan_err','Số đơn lỗi của chuyến'],['plan_err_pct','% đơn lỗi của chuyến'],['plan_fail_txt','Chuyến lỗi >30% (theo dõi)'],['plan_ratio','Tỷ lệ tải chuyến'],['TruckCategory','Loại xe'],['TruckCapacityWeight','Tải trọng xe'],['Assigned_Weight','Khối lượng đơn'],['h24_dur','Thời gian tính SLA 24H (giờ)'],['loi','Loại lỗi'],['ly_do','Lý do']];
+const XCOLS=[['Date','Ngày'],['TenantName','NPP'],['PlanNumber','Chuyến'],['OrderNumber','Đơn'],['OutletCode','Outlet'],['username','Tài khoản'],['utype','Loại tài khoản'],['DriverName','Tài xế/Xe'],['Status','Trạng thái'],['Sent_To_distributor','Created Date'],['DeliverDateTime','Giao lúc'],['PromisedDate','Ngày hứa'],['distance_to_dropped','Lệch vị trí (m)'],['gap','Cách outlet trước (phút)'],['seq','Thứ tự trong chuyến'],['plan_orders','Số đơn của chuyến'],['plan_err','Đơn lỗi của chuyến'],['plan_err_pct','% đơn lỗi của chuyến'],['plan_fail_txt','Chuyến lỗi >30%'],['plan_ratio','Tỷ lệ tải chuyến'],['TruckCategory','Loại xe'],['TruckCapacityWeight','Tải trọng xe'],['Assigned_Weight','Khối lượng đơn'],['h24_dur','Thời gian SLA 24H (giờ)'],['loi','Loại lỗi'],['ly_do','Chi tiết']];
 const xv=(r,k)=>k==='plan_err_pct'?Math.round(r.plan_err_ratio*1000)/10:k==='plan_fail_txt'?(r.plan_fail?'Có':'Không'):r[k];
 async function saveFile(kind){
   const rows=filtered();
@@ -520,95 +525,94 @@ async function saveFile(kind){
     const q=v=>{const s=String(v??'');return /[",\n;]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
     data='﻿'+[XCOLS.map(c=>c[1]).join(','),...rows.map(r=>XCOLS.map(c=>q(xv(r,c[0]))).join(','))].join('\n');
   } else {
-    if(!window.XLSX){toast('Chưa tải được thư viện Excel. Hãy dùng Tải CSV.');return;}
+    if(!window.XLSX){toast('Chưa tải được thư viện Excel, hãy dùng CSV.');return;}
     const ws=XLSX.utils.aoa_to_sheet([XCOLS.map(c=>c[1]),...rows.map(r=>XCOLS.map(c=>xv(r,c[0])??''))]);
     ws['!cols']=XCOLS.map(c=>({wch:Math.max(10,c[1].length+2)}));
     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Don loi');
     data=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
   }
   const dl=window.claude&&window.claude.use&&await window.claude.use('downloads');
-  if(!dl){const blob=data instanceof Uint8Array?new Blob([data],{type:'application/octet-stream'}):new Blob([data],{type:'text/csv;charset=utf-8'});
+  if(!dl){const blob=new Blob([data],{type:kind==='csv'?'text/csv;charset=utf-8':'application/octet-stream'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);toast('Đã tải '+fmt(rows.length)+' dòng');return;}
   try{await dl.save({filename:name,data});toast('Đã tải '+fmt(rows.length)+' dòng');}
   catch(e){if(e&&e.code!=='declined') toast('Không tải được file ('+(e.code||'lỗi')+').');}
 }
 
-/* ---------------- trang: Cách chấm điểm ---------------- */
+/* ---------------- Cách tính ---------------- */
 function pLogic(){
   const W=`${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00`;
   const R=[
-   ['Payload','Chuyến quá tải < '+T_PL+'% số chuyến','Chuyến',`Chuyến lỗi khi tổng <code>Assigned_Weight</code> chia <code>TruckCapacityWeight</code> từ ${TH.payload_ratio} lần trở lên. NPP đạt khi số chuyến lỗi dưới ${T_PL}% tổng chuyến (tức trên ${100-T_PL}% chuyến đúng tải). Mọi chuyến quá tải vẫn được ghi lỗi để theo dõi.`],
-   ['Distance & Time','Chuyến hỏng < '+T_DT+'% số chuyến','Đơn → chuyến',`Đơn lỗi khi <code>time_outlet_outlet</code> dưới ${TH.dt_gap_min} phút <b>và</b> khoảng cách tới outlet liền trước trong chuyến trên ${TH.dt_dist_min}m. Chuyến hỏng khi số đơn đúng dưới ${100-TH.dt_route_pct*100}% số đơn của chuyến (đúng ${TH.dt_route_pct*100}% đơn lỗi vẫn đạt).`],
-   ['Created Date','0 chuyến lỗi','Đơn → chuyến','Đơn lỗi khi thời điểm tạo (<code>Sent_To_distributor</code> trong Fill Rate, ghép <code>DocNo = OrderNumber</code>) muộn hơn <code>DeliverDateTime</code>. Một đơn lỗi là chuyến lỗi; một chuyến lỗi là NPP trượt tiêu chí và trượt Data Accuracy tháng.'],
-   ['User name','0 tài khoản sai','Tài khoản','Mỗi tài khoản giao hàng phải là số điện thoại tài xế (10 số, bắt đầu bằng 0), biển số xe, hoặc tài khoản kho chứa "DSA". Tên chữ, mã tự đặt như "xe12345" là sai.']];
+   ['Payload',`< ${T_PL}% chuyến`,`Chuyến lỗi khi tổng tải / tải trọng xe ≥ ${TH.payload_ratio}.`],
+   ['Distance & Time',`< ${T_DT}% chuyến`,`Đơn lỗi khi cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi.`],
+   ['Created Date','0 chuyến','Đơn lỗi khi tạo sau giờ giao (<code>Sent_To_distributor</code> > <code>DeliverDateTime</code>). 1 đơn lỗi là chuyến lỗi.'],
+   ['User name','0 tài khoản sai','Tài khoản phải là SĐT 10 số, biển số xe hoặc tài khoản DSA.']];
   const T=[
-   ['Geo Compliance',`Đơn đạt khi cùng lúc: lệch vị trí ≤ ${TH.geo_radius_m}m, cách outlet trước trên ${TH.geo_gap_min} phút, hoàn tất trong ${W}. Không tính đơn tài khoản DSA. Mức tham chiếu ≥ ${TH.geo}%.`],
-   ['On time',`Lấy cột <code>is_ontime</code> của TMS (giao trong SLA 24h/48h kể từ lúc đặt hàng). Successful dùng chung kết quả này. Mức tham chiếu > ${TH.ontime}%.`],
-   ['On time 24H',`Đồng hồ tính từ thời điểm tạo đơn (<code>Sent_To_distributor</code>) tới <code>DeliverDateTime</code>, phải trong ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00 và giao sau ngày tạo: đồng hồ bắt đầu 00:00 hôm sau; tạo thứ 7 từ ${TH.send_cutoff}:00 thì bắt đầu 00:00 thứ 2. Chủ nhật là ngày nghỉ, thời gian rơi vào Chủ nhật được trừ, trừ khi đơn được giao vào Chủ nhật. Giao sau ${TH.wh_end}:00:00 cũng là lỗi. Đơn tạo sau khi giao tính là lỗi; đơn thiếu giờ tạo hoặc giờ giao không xét. Mức tham chiếu > ${TH.ontime}%.`],
-   ['Chuyến lỗi > '+T_PLAN+'%',`Đơn lỗi ở bất kỳ KPI nào (kể cả Geo, On time); chuyến lỗi khi trên ${T_PLAN}% đơn lỗi. Mức tham chiếu ≤ ${T_TOL}% số chuyến. Giúp NPP thấy chuyến nào cần rà trước.`]];
-  let h=`<section class="card"><div><h2>Cách chấm điểm</h2><p class="cap">Theo file chấm Data Accuracy chính thức. NPP đạt tháng khi qua <b>cả 4 tiêu chí</b>; trượt một tiêu chí là mất trọn 15% DIP (10% Data Accuracy + 5% TMS). Dữ liệu tính trên toàn bộ đơn trong file TMS của tháng.</p></div>
-    <div class="gate">${R.map(r=>`<div>${r[0]}<span>${r[1]}</span></div>`).join('')}</div></section>`;
-  h+=`<section class="card"><h2>4 tiêu chí tính kết quả</h2><div class="rules">${R.map(r=>`<article class="rule"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p><span class="eyebrow">Đếm theo</span> ${r[2]}</p><p>${r[3]}</p></article>`).join('')}</div></section>`;
-  h+=`<section class="card"><div><h2>Chỉ số theo dõi</h2><p class="cap">Hiển thị để NPP theo dõi và cải thiện, không ảnh hưởng kết quả tháng.</p></div><div class="rules">${T.map(r=>`<article class="rule"><h3>${r[0]}</h3><p>${r[1]}</p></article>`).join('')}</div></section>`;
-  h+=`<section class="card"><h2>Đọc báo cáo</h2><div class="rules">
-    <article class="rule"><h3>Được phép</h3><p>Số chuyến lỗi tối đa vẫn đạt = số lớn nhất còn dưới ${T_DT}% tổng chuyến. NPP 400 chuyến được phép tối đa 19 chuyến hỏng D&T và 19 chuyến quá tải.</p></article>
-    <article class="rule"><h3>Khoảng cách giữa hai outlet</h3><p>File TMS không có sẵn cột khoảng cách, nên báo cáo tính từ toạ độ <code>lat_to/long_to</code> của hai outlet liên tiếp trong chuyến.</p></article>
-    <article class="rule"><h3>Nếu thấy số liệu chưa đúng</h3><p>Vào tab Đơn hàng có lỗi, lọc theo loại lỗi hoặc ngày, tải Excel, đánh dấu đơn nghi bị tính oan kèm lý do và gửi quản lý vùng phụ trách NPP.</p></article></div></section>`;
+   ['Geo Compliance',`≥ ${TH.geo}%`,`Đạt khi lệch ≤ ${TH.geo_radius_m}m, cách outlet trước > ${TH.geo_gap_min} phút, hoàn tất trong ${W}. Không tính DSA.`],
+   ['On time',`> ${TH.ontime}%`,'Theo cột <code>is_ontime</code> của TMS. Successful dùng chung kết quả.'],
+   ['On time 24H',`> ${TH.ontime}%`,`Từ lúc tạo đơn đến lúc giao ≤ ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00, giao hôm sau: tính từ 00:00 hôm sau (thứ 7 → thứ 2). Trừ Chủ nhật nếu không giao Chủ nhật. Giao sau ${TH.wh_end}:00 là lỗi.`],
+   [`Chuyến lỗi > ${T_PLAN}%`,`≤ ${T_TOL}% chuyến`,'Gộp lỗi mọi KPI, kể cả Geo, On time, 24H.']];
+  let h=`<section class="card"><div><h2>Cách tính kết quả tháng</h2><p class="sub">Theo file chấm Data Accuracy chính thức.</p></div>
+    <div class="flow"><div><span class="lbl">Bước 1</span><b>Đơn lỗi</b><span class="sub">Ghi nhận lỗi theo từng tiêu chí.</span></div>
+    <div><span class="lbl">Bước 2</span><b>Chuyến lỗi</b><span class="sub">Gộp đơn lỗi theo chuyến (PlanNumber).</span></div>
+    <div><span class="lbl">Bước 3</span><b>Kết quả NPP</b><span class="sub">Đạt cả 4 tiêu chí mới đạt tháng, nhận 15% DIP.</span></div></div></section>`;
+  h+=`<section class="card"><h2>4 tiêu chí xét kết quả</h2><div class="rules">${R.map(r=>`<article class="rule"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
+  h+=`<section class="card"><div><h2>Chỉ số theo dõi</h2><p class="sub">Giúp NPP cải thiện, không tính vào kết quả.</p></div><div class="rules">${T.map(r=>`<article class="rule trk"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
+  h+=`<section class="card"><h2>Lưu ý</h2><div class="rules">
+    <article class="rule"><h3>Mức cho phép</h3><p>Số chuyến lỗi tối đa vẫn đạt = số lớn nhất còn dưới ${T_DT}% tổng chuyến. Ví dụ 400 chuyến: tối đa 19.</p></article>
+    <article class="rule"><h3>Khoảng cách outlet</h3><p>Tính từ toạ độ <code>lat_to/long_to</code> của 2 outlet liên tiếp trong chuyến.</p></article>
+    <article class="rule"><h3>Phản hồi số liệu</h3><p>Tab Đơn lỗi → lọc → Tải Excel → đánh dấu đơn cần xem lại → gửi quản lý vùng.</p></article></div></section>`;
   return h;
 }
 
-/* ---------------- trang: Chất lượng dữ liệu (admin) ---------------- */
+/* ---------------- Data Quality (admin) ---------------- */
 function pDq(){
   const q=DATA.dq;
-  let h=`<section class="card"><div><h2>Ghép hai file</h2><p class="cap">TMS_Order_Detail (OrderNumber) ghép với Fill_Rate (DocNo) để lấy Created Date = Sent_To_distributor.</p></div>
-  <div class="dl">
-    <div><b>${fmt(q.rows_tms)}</b><span>dòng TMS · ${fmt(q.dup_orders)} đơn trùng</span></div>
+  let h=`<section class="card"><div><h2>Ghép 2 file</h2><p class="sub">TMS Order Detail (<code>OrderNumber</code>) ghép Fill Rate (<code>DocNo</code>).</p></div>
+  <div class="stats">
+    <div><b>${fmt(q.rows_tms)}</b><span>đơn TMS · ${fmt(q.dup_orders)} trùng</span></div>
     <div><b>${fmt(q.rows_fr)}</b><span>dòng Fill Rate</span></div>
-    <div><b>${fmt(q.matched)}</b><span>đơn ghép được (${pc(q.matched/q.rows_tms*100)})</span></div>
-    <div><b>${fmt(q.tms_unmatched)}</b><span>đơn TMS không có trong Fill Rate</span></div>
-    <div><b>${fmt(q.fr_unmatched)}</b><span>đơn Fill Rate không có trong TMS</span></div>
-  </div>
-  ${table([['NPP'],['Đơn TMS không ghép được'],['Trạng thái']],q.tms_unmatched_rows.map(r=>`<tr><td>${esc(r.npp)}</td><td class="mono">${esc(r.order)}</td><td>${esc(r.status)}</td></tr>`))}
-  <p class="cap">Đơn Fill Rate không có trong TMS: <span class="mono">${q.fr_unmatched_list.map(esc).join(', ')||'—'}</span>.</p></section>`;
-  h+=`<section class="card"><h2>Phát hiện trong dữ liệu</h2><div class="dl">
-    <div><b>${fmt(q.null_deliver)}</b><span>đơn thiếu DeliverDateTime</span></div>
-    <div><b>${fmt(q.deliver_after_period)}</b><span>đơn giao sau 30/09 (ngày kế hoạch trong tháng 9)</span></div>
-    <div><b>${fmt(q.deliver_before_period)}</b><span>đơn ghi giao trước 01/09</span></div>
-    <div><b>${fmt(q.geo_out5k)}</b><span>đơn lệch vị trí trên 5km · xa nhất ${fmt(Math.round(q.geo_max/1000))}km</span></div>
-    <div><b>${pc(q.gap_match)}</b><span>khoảng cách thời gian tự tính khớp cột time_outlet_outlet (±1 phút)</span></div>
-    <div><b>${fmt(q.plans_mixed_cap)}</b><span>chuyến có nhiều mức tải trọng xe</span></div>
-    <div><b>${fmt(q.cd_neg)}</b><span>đơn tạo sau khi giao · ${fmt(q.cd_neg_gt24)} đơn chênh trên 1 ngày</span></div>
-    ${Object.entries(q.status).map(([k,v])=>`<div><b>${fmt(v)}</b><span>trạng thái ${esc(k)}</span></div>`).join('')}
-  </div></section>`;
+    <div><b>${pc(q.matched/q.rows_tms*100)}</b><span>${fmt(q.matched)} đơn ghép được</span></div>
+    <div><b>${fmt(q.tms_unmatched)}</b><span>đơn TMS không có Fill Rate</span></div>
+    <div><b>${fmt(q.fr_unmatched)}</b><span>đơn Fill Rate không có TMS</span></div></div>
+  ${q.tms_unmatched_rows.length?table([['NPP'],['Đơn không ghép được'],['Trạng thái']],q.tms_unmatched_rows.map(r=>`<tr><td>${esc(r.npp)}</td><td class="mono">${esc(r.order)}</td><td>${esc(r.status)}</td></tr>`)):''}</section>`;
+  h+=`<section class="card"><h2>Bất thường trong dữ liệu</h2><div class="stats">
+    <div><b>${fmt(q.null_deliver)}</b><span>đơn thiếu giờ giao</span></div>
+    <div><b>${fmt(q.deliver_after_period)}</b><span>đơn giao sau kỳ</span></div>
+    <div><b>${fmt(q.deliver_before_period)}</b><span>đơn ghi giao trước kỳ</span></div>
+    <div><b>${fmt(q.geo_out5k)}</b><span>đơn lệch > 5km (xa nhất ${fmt(Math.round(q.geo_max/1000))}km)</span></div>
+    <div><b>${fmt(q.plans_mixed_cap)}</b><span>chuyến nhiều mức tải trọng</span></div>
+    <div><b>${fmt(q.cd_neg)}</b><span>đơn tạo sau khi giao</span></div>
+    ${Object.entries(q.status).map(([k,v])=>`<div><b>${fmt(v)}</b><span>${esc(k)}</span></div>`).join('')}</div></section>`;
   const sens=DATA.sens;
-  h+=`<section class="card"><div><h2>Kết quả thay đổi thế nào theo cách chốt</h2><p class="cap">Các điểm chưa có văn bản chốt. Ô được tô là NPP đổi kết quả so với cách đang áp dụng.</p></div>
-    ${table([['Kịch bản'],['Số NPP đạt','n'],...NPPS.map(n=>[n])],sens.map(s=>`<tr><th scope="row">${esc(s.label)}</th><td class="n">${s.pass}/${NPPS.length}</td>${NPPS.map(n=>{const ch=s.v[n]!==sens[0].v[n];return `<td style="${ch?'background:var(--warn-soft)':''}" class="${s.v[n]==='PASS'?'cok':''}">${s.v[n]==='PASS'?'Đạt':'Trượt'}</td>`;}).join('')}</tr>`))}</section>`;
+  h+=`<section class="card"><div><h2>So sánh cách tính</h2><p class="sub">Ô vàng: NPP đổi kết quả so với cách đang áp dụng.</p></div>
+    ${table([['Cách tính'],['Đạt','n'],...NPPS.map(n=>[n])],sens.map(s=>`<tr><th scope="row" style="font-weight:500">${esc(s.label)}</th><td class="n">${s.pass}/${NPPS.length}</td>${NPPS.map(n=>{const ch=s.v[n]!==sens[0].v[n];return `<td style="${ch?'background:var(--warn-soft)':''}" class="${s.v[n]==='PASS'?'cok':''}">${s.v[n]==='PASS'?'✓':'✕'}</td>`;}).join('')}</tr>`))}</section>`;
   return h;
 }
 
 /* ---------------- điều hướng ---------------- */
-const PAGES=[['overview','Tổng quan',pOverview],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng theo ngày',pTrend],['errors','Đơn hàng có lỗi',pErrors],['logic','Cách chấm điểm',pLogic],['dq','Chất lượng dữ liệu',pDq]];
+const PAGES=[['overview','Tổng quan',pOverview],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng',pTrend],['errors','Đơn lỗi',pErrors],['logic','Cách tính',pLogic],['dq','Data Quality',pDq]];
 function buildTabs(){
   $('#tabs').innerHTML=PAGES.filter(p=>p[0]!=='dq'||isAdmin()).map(p=>`<button type="button" role="tab" data-p="${p[0]}" aria-selected="${p[0]===page}" class="${p[0]===page?'on':''}">${p[1]}</button>`).join('');
 }
 function render(){
   buildTabs();
   const inf=scope==='ALL'?null:DATA.npp_info[scope];
-  $('#hmeta').textContent=`${DATA.meta.bu} · ${scope==='ALL'?DATA.meta.regions.join(', ')+' · '+NPPS.length+' NPP':inf.area+' · NPP '+scope} · Kỳ ${DATA.meta.period}`;
+  $('#hmeta').textContent=`${scope==='ALL'?DATA.meta.bu+' · '+NPPS.length+' NPP':'NPP '+scope+' · '+inf.area} · ${DATA.meta.period}`;
   $('#main').innerHTML=PAGES.find(p=>p[0]===page)[2]();
   try{ if(location.hash!=='#'+page) history.replaceState(null,'','#'+page);}catch(_){}
   wire();
 }
 function go(p){page=p;render();window.scrollTo({top:0});}
 function setScope(n){if(!isAdmin())return;scope=n;$('#scope').value=n;EF.npp='';epage=1;render();}
+const reset=o=>Object.assign({q:'',type:'',day:'',npp:'',pf:false},o);
 function wire(){
   document.querySelectorAll('[data-npp]').forEach(el=>el.addEventListener('click',()=>setScope(el.dataset.npp)));
   document.querySelectorAll('.kpi[data-kpi]').forEach(el=>el.addEventListener('click',()=>{kpiSel=el.dataset.kpi;go('kpi');}));
   document.querySelectorAll('[data-ks]').forEach(el=>el.addEventListener('click',()=>{kpiSel=el.dataset.ks;render();}));
-  document.querySelectorAll('[data-plan]').forEach(el=>el.addEventListener('click',()=>{EF={q:el.dataset.plan,type:'',day:'',npp:'',pf:false};epage=1;go('errors');}));
-  document.querySelectorAll('[data-user]').forEach(el=>el.addEventListener('click',()=>{EF={q:el.dataset.user,type:'',day:'',npp:'',pf:false};epage=1;go('errors');}));
-  document.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{EF={q:'',type:'',day:el.dataset.day,npp:'',pf:false};epage=1;go('errors');}));
+  document.querySelectorAll('[data-plan]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.plan});epage=1;go('errors');}));
+  document.querySelectorAll('[data-user]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.user});epage=1;go('errors');}));
+  document.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{EF=reset({day:el.dataset.day});epage=1;go('errors');}));
   if(page==='errors'){
     let tmr;
     $('#fq').addEventListener('input',e=>{clearTimeout(tmr);tmr=setTimeout(()=>{EF.q=e.target.value;epage=1;render();const f=$('#fq');f.focus();f.setSelectionRange(f.value.length,f.value.length);},300);});
@@ -616,7 +620,7 @@ function wire(){
     $('#fd').addEventListener('change',e=>{EF.day=e.target.value;epage=1;render();});
     $('#fpf').addEventListener('change',e=>{EF.pf=e.target.checked;epage=1;render();});
     if($('#fn')) $('#fn').addEventListener('change',e=>{EF.npp=e.target.value;epage=1;render();});
-    $('#fclear').addEventListener('click',()=>{EF={q:'',type:'',day:'',npp:'',pf:false};epage=1;render();});
+    $('#fclear').addEventListener('click',()=>{EF=reset({});epage=1;render();});
     $('#pprev').addEventListener('click',()=>{epage--;render();});
     $('#pnext').addEventListener('click',()=>{epage++;render();});
     $('#xlsx').addEventListener('click',()=>saveFile('xlsx'));
@@ -630,17 +634,16 @@ $('#theme').addEventListener('click',()=>{const r=document.documentElement;
   const dark=r.dataset.theme?r.dataset.theme!=='dark':!matchMedia('(prefers-color-scheme: dark)').matches;
   r.dataset.theme=dark?'dark':'light';$('#theme').setAttribute('aria-pressed',dark);});
 
-/* ---------------- vào ứng dụng sau khi giải mã ---------------- */
-$('#foot').innerHTML=`Nguồn: ${esc(DATA.meta.src)} · Kỳ ${esc(DATA.meta.period)} · Dựng lúc ${esc(DATA.meta.built)}. Dữ liệu tự cập nhật khi có file mới trong thư mục input/ của repo.`;
+/* ---------------- vào ứng dụng ---------------- */
+$('#foot').textContent=`Nguồn: ${DATA.meta.src} · Kỳ ${DATA.meta.period} · Cập nhật ${DATA.meta.built}`;
 role=LOGIN_ROLE;scope=role==='admin'?'ALL':role;
-$('#who').textContent=role==='admin'?'Admin · phạm vi':'NPP '+role;
+$('#who').textContent=role==='admin'?'Admin':'NPP '+role;
 const sel=$('#scope');sel.hidden=role!=='admin';
 if(role==='admin') sel.innerHTML=`<option value="ALL">Tất cả NPP</option>`+NPPS.map(n=>`<option value="${n}">NPP ${n}</option>`).join('');
 $('#login').hidden=true;$('#app').hidden=false;
 const want=(location.hash||'').slice(1);
 page=PAGES.some(p=>p[0]===want)&&(want!=='dq'||role==='admin')?want:'overview';
 render();
-/* đăng xuất: tải lại trang để xoá dữ liệu đã giải mã khỏi bộ nhớ */
 $('#logout').addEventListener('click',()=>{try{history.replaceState(null,'',location.pathname);}catch(_){}location.reload();});
 }
 </script>

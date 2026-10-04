@@ -1,10 +1,10 @@
 name: Cập nhật dashboard
 
-# Chạy khi có file mới trong input/, hoặc bấm "Run workflow" trong tab Actions.
+# Chạy khi có file mới trong input/, khi sửa engine/ (giao diện, logic), hoặc bấm "Run workflow" trong tab Actions.
 on:
   push:
     branches: [main]
-    paths: ['input/**.xlsx']
+    paths: ['input/**.xlsx', 'engine/**']
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,11 @@ jobs:
       - name: Cài thư viện
         run: pip install -r requirements.txt
 
+      - name: Lấy dữ liệu (file mới, hoặc bản mã hoá lần trước)
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: python engine/vault.py restore
+
       - name: Tính KPI từ 2 file trong input/
         run: python engine/compute.py
 
@@ -45,16 +50,21 @@ jobs:
         with:
           path: docs
 
-      # Repo công khai: xoá file Excel thô khỏi thư mục input/ sau khi đã dựng xong,
-      # để người ngoài không tải được dữ liệu gốc từ trang repo.
-      - name: Xoá file dữ liệu thô (repo công khai)
-        if: ${{ !github.event.repository.private }}
+      # Lưu bản mã hoá của dữ liệu để lần sau dựng lại được khi chỉ sửa giao diện.
+      # Repo công khai: xoá file Excel thô khỏi input/ để người ngoài không tải được dữ liệu gốc.
+      - name: Lưu dữ liệu mã hoá, xoá file thô
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          IS_PRIVATE: ${{ github.event.repository.private }}
         run: |
+          python engine/vault.py save
           git config user.name "TMS Dashboard Bot"
           git config user.email "actions@github.com"
-          git rm -q --ignore-unmatch input/*.xlsx
+          git add input/last_data.enc
+          if [ "$IS_PRIVATE" != "true" ]; then git rm -q --cached --ignore-unmatch input/*.xlsx; fi
           if ! git diff --cached --quiet; then
-            git commit -m "Xoá file dữ liệu thô sau khi cập nhật dashboard [skip ci]"
+            git commit -m "Cập nhật dữ liệu mã hoá [skip ci]"
+            git pull --rebase -q origin main
             git push
           fi
 
