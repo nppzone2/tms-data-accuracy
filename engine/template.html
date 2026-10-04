@@ -707,7 +707,7 @@ function pDq(){
 }
 
 /* ---------------- điều hướng ---------------- */
-const PAGES=[['overview','Tổng quan',pOverview],['months',`${DONE.length||3} tháng`,pMonths],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng',pTrend],['errors','Đơn lỗi',pErrors],['logic','Cách tính',pLogic],['dq','Data Quality',pDq]];
+const PAGES=[['months',`${DONE.length||3} tháng`,pMonths],['overview','Tổng quan',pOverview],['kpi','Chi tiết KPI',pKpi],['trend','Xu hướng',pTrend],['errors','Đơn lỗi',pErrors],['logic','Cách tính',pLogic],['dq','Data Quality',pDq]];
 function buildTabs(){
   $('#tabs').innerHTML=PAGES.filter(p=>p[0]!=='dq'||isAdmin()).map(p=>`<button type="button" role="tab" data-p="${p[0]}" aria-selected="${p[0]===page}" class="${p[0]===page?'on':''}">${p[1]}</button>`).join('');
 }
@@ -772,7 +772,7 @@ const sel=$('#scope');sel.hidden=role!=='admin';
 fillScope();
 $('#login').hidden=true;$('#app').hidden=false;
 const want=(location.hash||'').slice(1);
-page=PAGES.some(p=>p[0]===want)&&(want!=='dq'||role==='admin')?want:'overview';
+page=PAGES.some(p=>p[0]===want)&&(want!=='dq'||role==='admin')?want:(DONE.length?'months':'overview');
 render();
 $('#logout').addEventListener('click',()=>{try{history.replaceState(null,'',location.pathname);}catch(_){}location.reload();});
 }
