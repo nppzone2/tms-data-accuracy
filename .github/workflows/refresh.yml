@@ -6,9 +6,9 @@ on:
     branches: [main]
     paths: ['input/**.xlsx', 'engine/**']
   workflow_dispatch:
-  # Dựng lại mỗi ngày lúc 00:30 giờ Việt Nam để chuyển tháng đang chạy sang tháng đã hoàn thành đúng hạn.
+  # Dựng lại mỗi ngày lúc 10:00 giờ Việt Nam (03:00 UTC).
   schedule:
-    - cron: '30 17 * * *'
+    - cron: '0 3 * * *'
 
 permissions:
   contents: write
