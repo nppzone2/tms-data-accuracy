@@ -136,6 +136,8 @@ tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
 tbody th{font-weight:600}
 tr.click{cursor:pointer} tr.click:hover td,tr.click:hover th{background:var(--brand-lt)}
 td.cok{color:var(--good);font-weight:600} td.cno{color:var(--crit);font-weight:700;background:var(--crit-soft)}
+td.cwarn{color:var(--warn);font-weight:700;background:var(--warn-soft)}
+.kpi.below{border-color:var(--warn);box-shadow:inset 0 3px 0 var(--warn)}
 tr.tot th,tr.tot td{background:var(--sunk);font-weight:600}
 .mono{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:.8rem}
 .why{color:var(--muted);font-size:.78rem;max-width:44ch;min-width:28ch;white-space:normal}
@@ -310,8 +312,8 @@ function hbar(items,{thr=null,max=null,fmtv=v=>pc(v),neutral=0}={}){
   [0,.5,1].forEach(t=>{const xx=lw+(W-lw-rw)*t;s+=`<line class="grid-l" x1="${xx}" x2="${xx}" y1="4" y2="${H-22}"/><text x="${xx}" y="${H-6}" text-anchor="middle">${n1(mx*t,mx<10?1:0)}</text>`;});
   items.forEach((it,i)=>{const y=6+i*rh;
     s+=`<text class="tl" x="${lw-10}" y="${y+15}" text-anchor="end">${esc(it.l)}</text>`;
-    s+=`<rect x="${lw}" y="${y+5}" width="${Math.max(2,x(it.v)-lw)}" height="${rh-12}" rx="4" fill="${neutral?'var(--s1)':it.bad?'var(--crit)':'var(--good)'}"><title>${esc(it.l)}: ${fmtv(it.v)}</title></rect>`;
-    s+=`<text class="tv" x="${x(it.v)+6}" y="${y+15}">${it.bad?'✕ ':''}${fmtv(it.v)}</text>`;});
+    s+=`<rect x="${lw}" y="${y+5}" width="${Math.max(2,x(it.v)-lw)}" height="${rh-12}" rx="4" fill="${neutral?(it.bad?'var(--warn)':'var(--s1)'):it.bad?'var(--crit)':'var(--good)'}"><title>${esc(it.l)}: ${fmtv(it.v)}</title></rect>`;
+    s+=`<text class="tv" x="${x(it.v)+6}" y="${y+15}">${it.bad?(neutral?'! ':'✕ '):''}${fmtv(it.v)}</text>`;});
   if(thr!=null){const tx=x(thr);s+=`<line x1="${tx}" x2="${tx}" y1="0" y2="${H-22}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>`;}
   return `<div class="chart">${s}</svg></div>`;
 }
@@ -371,13 +373,13 @@ const CAP=[
  {k:'ontime',n:'On time',v:s=>pc(s.ot_pct,1),ok:s=>s.v_ontime,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.ot_fail)} đơn giao trễ hạn`},
  {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} đơn quá 24H · ${fmt(s.wh_fail)} giao sau ${TH.wh_end}:00`}];
 const DRV=[['Geo'],['D&T'],['Payload'],['Created Date'],['User']];
-const capNote=v=>`<span class="chip na">${v==='PASS'?'Trên':'Dưới'} tham chiếu</span>`;
+const capNote=v=>v==='PASS'?'<span class="chip na">Trên tham chiếu</span>':'<span class="chip warn">! Dưới tham chiếu</span>';
 
 function tile(c,s,all,track){
   const ok=c.ok(s)==='PASS';
-  if(track==='cap') return `<button type="button" class="kpi trk" data-kpi="${c.k}">
+  if(track==='cap') return `<button type="button" class="kpi trk ${ok?'':'below'}" data-kpi="${c.k}">
     <div class="kh"><span class="kn">${c.n}</span>${capNote(c.ok(s))}</div>
-    <div class="kv">${c.v(s)}</div><div class="kt">${esc(c.sub(s))}</div><div class="kt">${esc(c.th)}</div></button>`;
+    <div class="kv" style="${ok?'':'color:var(--warn)'}">${c.v(s)}</div><div class="kt">${esc(c.sub(s))}</div><div class="kt">${esc(c.th)}${all?` · ${DATA.scorecard.filter(x=>c.ok(x)!=='PASS').length}/${NPPS.length} NPP dưới tham chiếu`:''}</div></button>`;
   let bar='';
   if(c.bar){const [v,t]=c.bar(s);bar=`<div class="meter" aria-hidden="true"><b style="width:${Math.min(100,(v||0)/(t*3)*100)}%;background:${ok?'var(--good)':'var(--crit)'}"></b><i style="left:33.3%"></i></div>`;}
   const npass=all?DATA.scorecard.filter(x=>c.ok(x)==='PASS').length:null;
@@ -430,7 +432,7 @@ function pOverview(){
   if(all){
     const cell=(v,ok)=>`<td class="n ${ok==null?'':(ok==='PASS'?'cok':'cno')}">${v}</td>`;
     const rw=(x,tot)=>cell(pc(x.payload_fail_pct),tot?null:x.v_payload)+cell(pc(x.dt_route_fail_pct),tot?null:x.v_dt)+cell(fmt(x.cd_routes_fail),tot?null:x.v_created)+cell(fmt(x.users_wrong),tot?null:x.v_username);
-    const trk=x=>`<td class="n">${pc(x.ot_pct,1)}</td><td class="n">${pc(x.t24_pct,1)}</td><td class="n">${pc(x.geo_pct,1)}</td><td class="n">${pc(x.plan_fail_pct,1)}</td>`;
+    const trk=x=>`<td class="n ${x.v_ontime==='PASS'?'':'cwarn'}">${pc(x.ot_pct,1)}</td><td class="n ${x.v_24==='PASS'?'':'cwarn'}">${pc(x.t24_pct,1)}</td><td class="n">${pc(x.geo_pct,1)}</td><td class="n">${pc(x.plan_fail_pct,1)}</td>`;
     const rows=DATA.scorecard.map(x=>`<tr class="click" data-npp="${x.npp}"><th scope="row">${x.npp}</th><td>${chip(x.overall)}</td>${rw(x)}${trk(x)}</tr>`);
     rows.push(`<tr class="tot"><th scope="row">Tổng</th><td></td>${rw(DATA.total,true)}${trk(DATA.total)}</tr>`);
     h+=`<section class="card"><div class="ch"><div><h2>Bảng điểm NPP</h2><p class="sub">Bấm một dòng để xem riêng NPP.</p></div></div>${table([['NPP'],['Kết quả'],['Payload','n'],['D&T','n'],['Created Date','n'],['User sai','n'],['On time','n'],['24H','n'],['Geo','n'],[`Chuyến lỗi`,'n']],rows)}
@@ -500,14 +502,14 @@ function pKpi(){
       ${sec('Giờ hoàn tất',`Cột đỏ: ngoài ${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00.`,vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>{const hh=parseInt(it.l);return hh<TH.work_start||hh>=TH.work_end;}}))}</div>`;
   }
   if(k==='ontime'){
-    h+=top(all?byNpp(x=>x.ot_pct,{thr:TH.ontime,max:100,neutral:1}):'');
+    h+=top(all?byNpp(x=>x.ot_pct,{thr:TH.ontime,max:100,neutral:1,bad:x=>x.v_ontime!=='PASS'}):'');
     const late={};rowsIn(DATA.late_list||[]).filter(r=>r.ot).forEach(r=>{const m=/trễ (\d+) ngày/.exec(r.why);const key=m?m[1]+' ngày':(/chưa có giờ giao/.test(r.why)?'Thiếu giờ giao':'Trong ngày hứa');late[key]=(late[key]||0)+1;});
     const lk=Object.keys(late).sort((a,b)=>(parseInt(a)||99)-(parseInt(b)||99));
     h+=sec('Đơn giao trễ theo số ngày','So với PromisedDate. "Trong ngày hứa": TMS chấm trễ theo SLA giờ. Successful dùng chung kết quả này.',vbar(lk.map(x=>({l:x,v:late[x]})),{color:'var(--s1)'}));
     h+=sec('Danh sách đơn giao trễ (On time)','',lateTable(r=>r.ot));
   }
   if(k==='h24'){
-    h+=top(all?byNpp(x=>x.t24_pct,{thr:TH.ontime,max:100,neutral:1}):'');
+    h+=top(all?byNpp(x=>x.t24_pct,{thr:TH.ontime,max:100,neutral:1,bad:x=>x.v_24!=='PASS'}):'');
     h+=sec('Đơn chưa đạt 24H theo nguyên nhân',`Quá ${TH.sla_hours} giờ SLA hoặc giao sau ${TH.wh_end}:00. "Không xét": thiếu giờ tạo hoặc giờ giao.`,
       table([['NPP'],['Đơn xét','n'],['Chưa đạt','n'],['Quá 24H','n'],[`Sau ${TH.wh_end}:00`,'n'],['Không xét','n'],['Tỷ lệ đạt','n']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.t24_scope)}</td><td class="n">${fmt(x.t24_fail)}</td><td class="n">${fmt(x.h24_fail)}</td><td class="n">${fmt(x.wh_fail)}</td><td class="n">${fmt(x.h24_na)}</td><td class="n">${pc(x.t24_pct)}</td></tr>`)));
     const L=['Âm','0–12h','12–24h','24–48h','48–72h','> 72h'], hr=DATA.hours[scope], over=it=>it.l==='Âm'||it.l.startsWith('24')||it.l.startsWith('48')||it.l.startsWith('>');
@@ -647,11 +649,11 @@ function pMonths(){
   const head=[['Tiêu chí'],...ms.map(m=>[ml(m),'n'])];
   const cell=(m,c)=>{
     if(all){const d=BUNDLE.months[m], k=d.scorecard.filter(x=>x[c.v]==='PASS').length, n=d.npps.length, f=k/n;
-      return `<td class="n"><div class="ratio" style="margin-left:auto"><span>${k}/${n} ${c.cap?'trên tham chiếu':c.trk?'trong mức':'đạt'}</span><div class="meter"><b style="width:${f*100}%;background:${c.cap?'var(--s1)':f===1?'var(--good)':c.trk?'var(--warn)':'var(--crit)'}"></b></div></div></td>`;}
+      return `<td class="n"><div class="ratio" style="margin-left:auto"><span>${k}/${n} ${c.cap?'trên tham chiếu':c.trk?'trong mức':'đạt'}</span><div class="meter"><b style="width:${f*100}%;background:${c.cap?(f===1?'var(--s1)':'var(--warn)'):f===1?'var(--good)':c.trk?'var(--warn)':'var(--crit)'}"></b></div></div></td>`;}
     const r=rowOf(m,scope); if(!r) return '<td class="n">—</td>';
     const ok=r[c.v]==='PASS';
     if(!c.val) return `<td class="n">${chip(r.overall)}</td>`;
-    return `<td class="n ${c.trk?'':(ok?'cok':'cno')}">${c.val?c.f(c.val(r))+' ':''}${c.cap?'':c.trk?(ok?'':'!'):(ok?'✓':'✕')}</td>`;};
+    return `<td class="n ${c.cap?(ok?'':'cwarn'):c.trk?'':(ok?'cok':'cno')}">${c.val?c.f(c.val(r))+' ':''}${c.cap?(ok?'':'!'):c.trk?(ok?'':'!'):(ok?'✓':'✕')}</td>`;};
   h+=`<section class="card"><div><h2>${all?'Số NPP đạt theo tiêu chí':'Từng tiêu chí qua các tháng'}</h2><p class="sub">4 tiêu chí đầu xét kết quả · Geo: theo dõi · On time, 24H: năng lực giao hàng, không tính là lỗi.</p></div>${
     table(head,MC.map(c=>`<tr><th scope="row" style="${c.trk?'font-weight:500;color:var(--muted)':''}">${c.n}</th>${ms.map(m=>cell(m,c)).join('')}</tr>`))}</section>`;
   /* đạt / rớt từng NPP */
@@ -673,7 +675,7 @@ function pMonths(){
     return ms.map(m=>{const r=rowOf(m,n); if(!r) return '<td class="n">—</td>';
       const v=c.val(r), ok=r[c.v]==='PASS';
       let d=''; if(prev!=null&&v!==prev) d=`<span class="delta ${better(prev,v)?'up':'dn'}">${v>prev?'▲':'▼'}</span>`;
-      prev=v; return `<td class="n ${c.trk?'':(ok?'cok':'cno')}">${c.f(v)}${d}</td>`;}).join('');};
+      prev=v; return `<td class="n ${c.cap?(ok?'':'cwarn'):c.trk?'':(ok?'cok':'cno')}">${c.f(v)}${d}</td>`;}).join('');};
   const list=all?nppsAll():[scope];
   h+=`<section class="card"><div class="ch"><div><h2>Diễn biến chỉ số</h2><p class="sub">▲▼ so với tháng trước; xanh là tốt lên, đỏ là xấu đi.</p></div></div><div class="seg">${segs}</div>${
     table([['NPP'],...ms.map(m=>[ml(m),'n'])],list.map(n=>`<tr class="${all?'click':''}" ${all?`data-npp="${n}"`:''}><th scope="row">${n}</th>${line(n)}</tr>`).concat(all?[`<tr class="tot"><th scope="row">Tổng</th>${line('ALL').replace(/ c(ok|no)/g,'')}</tr>`]:[]))}</section>`;
