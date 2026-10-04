@@ -6,15 +6,16 @@ from datetime import datetime
 
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
-INPUT = ROOT / 'input'
-OUT = ROOT / 'build' / 'data.json'
+# Cách dùng: python engine/compute.py <thư mục chứa 2 file> <file json đầu ra>
+INPUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'input'
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / 'build' / 'data.json'
 
 def find_input(*keys):
     """Tìm file .xlsx trong input/ có tên chứa đủ các từ khoá (không phân biệt hoa thường, bỏ dấu cách/gạch)."""
     norm = lambda s: re.sub(r'[\s_\-]', '', s.lower())
     hits = [p for p in INPUT.glob('*.xlsx') if not p.name.startswith('~$') and all(k in norm(p.name) for k in keys)]
     if not hits:
-        sys.exit(f'LỖI: không tìm thấy file chứa {keys} trong thư mục input/. Hãy tải file lên input/.')
+        sys.exit(f'LỖI: không tìm thấy file chứa {keys} trong {INPUT}.')
     if len(hits) > 1:
         hits.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         print(f'Cảnh báo: có {len(hits)} file khớp {keys}, dùng file mới nhất: {hits[0].name}')
@@ -379,10 +380,7 @@ DATA = dict(
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
     dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, cd_list=cd_list, dq=dq, sens=sens)
 
-OUT.parent.mkdir(exist_ok=True)
+OUT.parent.mkdir(parents=True, exist_ok=True)
 json.dump(DATA, open(OUT, 'w'), ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o))
-for s in scorecard + [total]:
-    print(f"{s['npp']:5} n={s['orders']:5} pl={s['plans']:4} geo={s['geo_pct']:6} ot={s['ot_pct']:6} dtR={s['dt_routes_fail']:3}({s['dt_route_fail_pct']}%) pl={s['payload_plans_fail']:2} cd={s['cd_fail']:2} | "
-          f"DT={s['dt_route_fail_pct']}% CDr={s['cd_routes_fail']} PL={s['payload_fail_pct']}% U={s['users_wrong']}/{s['users_total']} -> {s['overall']} | ref plan {s['plan_fail_pct']}%")
-print('errors', len(errors)); print(json.dumps(dq, ensure_ascii=False)[:800])
-for s in sens: print(s['label'], s['pass'], s['v'])
+print(f"Kỳ {DATA['meta']['period']}: {sum(s['overall'] == 'PASS' for s in scorecard)}/{len(scorecard)} NPP đạt · "
+      f"{n_file:,} đơn · {len(errors):,} đơn lỗi -> {OUT.name}")

@@ -1,4 +1,4 @@
-"""Dựng trang dashboard đã mã hoá từ build/data.json -> docs/index.html.
+"""Dựng trang dashboard đã mã hoá từ build/months/<YYYY-MM>.json -> docs/index.html.
 
 Đăng nhập NPP: tên đăng nhập là mã NPP (DisCode trong file Fill Rate, ví dụ 10260142);
 gõ tên NPP (ví dụ P444) cũng được.
@@ -6,6 +6,7 @@ Mật khẩu lấy từ biến môi trường (GitHub Secrets):
   ADMIN_PASSWORD  mật khẩu tài khoản admin (xem toàn bộ NPP)
   NPP_PASSWORD    mật khẩu chung cho mọi NPP
   NPP_PASSWORDS   (tuỳ chọn) JSON {"P444": "matkhau", ...} để đặt mật khẩu riêng cho từng NPP
+Mỗi tài khoản nhận một gói gồm mọi tháng đang hiển thị; NPP chỉ nhận dữ liệu của mình.
 """
 import base64, gzip, json, os, sys
 from pathlib import Path
@@ -16,16 +17,23 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 ROOT = Path(__file__).resolve().parents[1]
 ITER = 200_000
 
-data = json.load(open(ROOT / 'build' / 'data.json', encoding='utf-8'))
-auth = data.pop('auth')   # mật khẩu mặc định (DisCode) — không bao giờ đưa vào trang
+files = sorted((ROOT / 'build' / 'months').glob('*.json'))
+if not files:
+    sys.exit('LỖI: chưa có dữ liệu tháng nào trong build/months/. Chạy engine/run.py prepare trước.')
+MONTHS = {f.stem: json.load(open(f, encoding='utf-8')) for f in files}
+ORDER = sorted(MONTHS)
+auth = {}
+for d in MONTHS.values():
+    auth.update(d.pop('auth'))       # mật khẩu mặc định (DisCode) — không bao giờ đưa vào trang
+NPPS = sorted(auth)
 
 admin_pw = os.environ.get('ADMIN_PASSWORD', '').strip()
 npp_pw = json.loads(os.environ.get('NPP_PASSWORDS', '') or '{}')
 common_pw = os.environ.get('NPP_PASSWORD', '').strip()
-warn = []
 if not admin_pw:
     sys.exit('LỖI: chưa đặt secret ADMIN_PASSWORD. Vào Settings → Secrets and variables → Actions để thêm.')
-for n in data['npps']:
+warn = []
+for n in NPPS:
     if not str(npp_pw.get(n, '')).strip():
         if common_pw: npp_pw[n] = common_pw
         else: npp_pw[n] = auth[n]; warn.append(n)
@@ -40,8 +48,8 @@ def seal(obj, password):
     raw = gzip.compress(json.dumps(obj, ensure_ascii=False, separators=(',', ':')).encode(), 9)
     return dict(salt=b64(salt), iv=b64(iv), ct=b64(AESGCM(key).encrypt(iv, raw, None)))
 
-def slice_for(n):
-    """Chỉ giữ dữ liệu của một NPP."""
+def slice_for(data, n):
+    """Chỉ giữ dữ liệu của một NPP trong một tháng."""
     d = {k: v for k, v in data.items() if k not in ('dq', 'sens')}
     row = next(s for s in data['scorecard'] if s['npp'] == n)
     keep = lambda rows: [r for r in rows if (r.get('npp') or r.get('TenantName')) == n]
@@ -56,12 +64,14 @@ def slice_for(n):
     d['meta'] = dict(data['meta'], npps=1)
     return d
 
-blobs = {'admin': seal(dict(data, __role='admin'), admin_pw)}
-for n in data['npps']:
-    blobs[auth[n]] = seal(dict(slice_for(n), __role=n), npp_pw[n])
-alias = {n.lower(): auth[n] for n in data['npps']}   # gõ tên NPP cũng mở được
+blobs = {'admin': seal(dict(__role='admin', order=ORDER, months=MONTHS), admin_pw)}
+for n in NPPS:
+    mine = {m: slice_for(d, n) for m, d in MONTHS.items() if n in d['npps']}
+    blobs[auth[n]] = seal(dict(__role=n, order=sorted(mine), months=mine), npp_pw[n])
+alias = {n.lower(): auth[n] for n in NPPS}   # gõ tên NPP cũng mở được
 
-enc = dict(iter=ITER, period=data['meta']['period'], built=data['meta']['built'], blobs=blobs, alias=alias)
+last = MONTHS[ORDER[-1]]['meta']
+enc = dict(iter=ITER, period=', '.join(f'T{int(m[5:])}/{m[:4]}' for m in ORDER), built=last['built'], blobs=blobs, alias=alias)
 tpl = (ROOT / 'engine' / 'template.html').read_text(encoding='utf-8')
 page = tpl.replace('/*__ENC__*/', json.dumps(enc).replace('</', '<\\/'))
 head = ('<!doctype html><html lang="vi"><head><meta charset="utf-8">'
@@ -71,4 +81,4 @@ out = ROOT / 'docs' / 'index.html'
 out.parent.mkdir(exist_ok=True)
 out.write_text(head + page + '</body></html>', encoding='utf-8')
 (ROOT / 'docs' / '.nojekyll').write_text('')
-print(f'Đã dựng {out.relative_to(ROOT)} ({out.stat().st_size/1024:,.0f} KB), {len(blobs)} gói dữ liệu.')
+print(f'Đã dựng {out.relative_to(ROOT)} ({out.stat().st_size/1024:,.0f} KB) · tháng: {", ".join(ORDER)} · {len(blobs)} tài khoản.')

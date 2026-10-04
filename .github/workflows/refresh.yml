@@ -30,13 +30,10 @@ jobs:
       - name: Cài thư viện
         run: pip install -r requirements.txt
 
-      - name: Lấy dữ liệu (file mới, hoặc bản mã hoá lần trước)
+      - name: Nhận dữ liệu theo tháng và tính KPI
         env:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-        run: python engine/vault.py restore
-
-      - name: Tính KPI từ 2 file trong input/
-        run: python engine/compute.py
+        run: python engine/run.py prepare
 
       - name: Dựng trang đã mã hoá
         env:
@@ -50,20 +47,21 @@ jobs:
         with:
           path: docs
 
-      # Lưu bản mã hoá của dữ liệu để lần sau dựng lại được khi chỉ sửa giao diện.
+      # Lưu kho dữ liệu mã hoá theo tháng (input/vault/YYYY-MM.enc) để giữ lịch sử và dựng lại khi sửa giao diện.
       # Repo công khai: xoá file Excel thô khỏi input/ để người ngoài không tải được dữ liệu gốc.
-      - name: Lưu dữ liệu mã hoá, xoá file thô
+      - name: Lưu kho mã hoá, xoá file thô
         env:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           IS_PRIVATE: ${{ github.event.repository.private }}
         run: |
-          python engine/vault.py save
+          python engine/run.py save
           git config user.name "TMS Dashboard Bot"
           git config user.email "actions@github.com"
-          git add input/last_data.enc
+          git add -A input/vault
+          git rm -q --cached --ignore-unmatch input/last_data.enc
           if [ "$IS_PRIVATE" != "true" ]; then git rm -q --cached --ignore-unmatch input/*.xlsx; fi
           if ! git diff --cached --quiet; then
-            git commit -m "Cập nhật dữ liệu mã hoá [skip ci]"
+            git commit -m "Cập nhật kho dữ liệu mã hoá [skip ci]"
             git pull --rebase -q origin main
             git push
           fi

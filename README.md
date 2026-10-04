@@ -2,17 +2,19 @@
 
 Dashboard KPI Data Accuracy của các nhà phân phối (NPP), tự cập nhật mỗi khi có file dữ liệu mới.
 
-## Cập nhật dữ liệu hằng ngày
+## Cập nhật dữ liệu
 
 1. Mở thư mục **`input/`** trên trang GitHub của repo.
-2. Bấm **Add file → Upload files**, kéo thả 2 file:
-   - file TMS Order Detail (tên có chữ `TMS`, ví dụ `TMS Order Detail.xlsx`)
-   - file Fill Rate (tên có chữ `Fill`, ví dụ `Fill Rate.xlsx`)
+2. Bấm **Add file → Upload files**, kéo thả 2 file **của cùng một tháng**:
+   - file TMS Order Detail (tên có chữ `TMS`)
+   - file Fill Rate (tên có chữ `Fill`)
 3. Bấm **Commit changes**.
 
-Khoảng 2–3 phút sau trang dashboard tự cập nhật. Theo dõi tiến trình ở tab **Actions**: dấu ✓ xanh là xong, dấu ✕ đỏ là lỗi (bấm vào để xem lý do).
+Workflow tự nhận tháng từ cột `Date` của file TMS. Tải lại trong tháng thì dữ liệu tháng đó được thay bằng file mới; sang tháng mới thì tháng cũ được giữ lại. Trang hiển thị **3 tháng gần nhất**, có ô chọn tháng ở thanh tiêu đề và tab **3 tháng** để so sánh đạt / rớt từng tiêu chí.
 
-Sau khi dựng xong, workflow lưu một bản **mã hoá** của dữ liệu (`input/last_data.enc`) và, nếu repo công khai, xoá 2 file Excel gốc khỏi `input/` để người ngoài không tải được. Nhờ bản mã hoá này, khi sửa giao diện hoặc logic trong `engine/`, trang tự dựng lại với dữ liệu gần nhất mà không cần tải lại file. Mỗi lần cập nhật dữ liệu nên tải đủ cả 2 file.
+Mỗi lần chỉ tải 2 file của một tháng. Muốn nạp nhiều tháng, tải lần lượt từng tháng và đợi lần trước chạy xong (dấu ✓ xanh ở tab **Actions**, khoảng 2–3 phút).
+
+Dữ liệu từng tháng được lưu dạng **mã hoá** trong `input/vault/` (khoá từ `ADMIN_PASSWORD`). Nếu repo công khai, workflow xoá 2 file Excel gốc khỏi `input/` sau khi xử lý. Khi sửa giao diện hoặc logic trong `engine/`, trang tự dựng lại với dữ liệu đã lưu. Lưu ý: đổi `ADMIN_PASSWORD` thì kho cũ không mở được nữa, cần tải lại dữ liệu các tháng.
 
 ## Cài đặt lần đầu (làm một lần)
 
@@ -58,9 +60,10 @@ input/                  nơi tải 2 file Excel lên
 engine/compute.py       tính toàn bộ KPI -> build/data.json
 engine/build_site.py    mã hoá dữ liệu, dựng docs/index.html
 engine/template.html    giao diện dashboard
-engine/vault.py         lưu / mở bản mã hoá của dữ liệu gần nhất
+engine/run.py           nhận tháng, lưu / mở kho mã hoá theo tháng, tính KPI từng tháng
+input/vault/            kho dữ liệu mã hoá, mỗi tháng một file
 .github/workflows/      workflow tự chạy khi có file mới
 ```
 
 Chạy trên máy: `pip install -r requirements.txt`, đặt 2 file vào `input/`, rồi
-`python engine/compute.py && ADMIN_PASSWORD=... python engine/build_site.py`, mở `docs/index.html` qua một web server (ví dụ `python -m http.server -d docs`).
+`ADMIN_PASSWORD=... python engine/run.py prepare && ADMIN_PASSWORD=... python engine/build_site.py`, mở `docs/index.html` qua một web server (ví dụ `python -m http.server -d docs`).
