@@ -437,10 +437,10 @@ function pOverview(){
     h+=`<section class="card"><div class="ch"><div><h2>Bảng điểm NPP</h2><p class="sub">Bấm một dòng để xem riêng NPP.</p></div></div>${table([['NPP'],['Kết quả'],['Payload','n'],['D&T','n'],['Created Date','n'],['User sai','n'],['On time','n'],['24H','n'],['Geo','n'],[`Chuyến lỗi`,'n']],rows)}
       <p class="sub">Payload, D&T: % chuyến lỗi · Created Date: số chuyến lỗi · User sai: số tài khoản. On time, 24H: năng lực giao hàng · Geo, Chuyến lỗi: theo dõi.</p></section>`;
     const fails=DATA.scorecard.filter(x=>x.overall==='FAIL');
-    if(fails.length) h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Phần còn thiếu để đạt, việc nhẹ nhất trước.</p></div></div>
+    if(fails.length) h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Tiêu chí cần tập trung và phần còn thiếu để đạt.</p></div></div>
       <div class="grid2">${fails.map(x=>`<div style="display:grid;gap:8px"><h3>${x.npp}</h3>${todoList(x)}</div>`).join('')}</div></section>`;
   } else {
-    h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Phần còn thiếu để đạt, việc nhẹ nhất trước.</p></div></div>${todoList(s)}</section>`;
+    h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Tiêu chí cần tập trung và phần còn thiếu để đạt.</p></div></div>${todoList(s)}</section>`;
     const us=DATA.users.ALL.filter(u=>u.npp===scope).slice(0,15);
     h+=`<section class="card"><div class="ch"><div><h2>Tài khoản nhiều đơn lỗi</h2><p class="sub">Bấm một tài khoản để xem đơn lỗi.</p></div></div>${
       table([['Tài khoản'],['Loại'],['Đơn','n'],['Đơn lỗi','n'],['D&T','n'],['Payload','n'],['Created','n'],['Geo','n'],['Trễ On time','n'],['Trễ 24H','n']],
