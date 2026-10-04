@@ -1,6 +1,6 @@
 """Dựng trang dashboard đã mã hoá từ build/months/<YYYY-MM>.json -> docs/index.html.
 
-Đăng nhập NPP: tên đăng nhập là mã NPP (DisCode trong file Fill Rate, ví dụ 10260142);
+Đăng nhập NPP: tên đăng nhập là mã NPP (DisCode trong file Fill Rate, dạng 8 chữ số);
 gõ tên NPP (ví dụ P444) cũng được.
 Mật khẩu lấy từ biến môi trường (GitHub Secrets):
   ADMIN_PASSWORD  mật khẩu tài khoản admin (xem toàn bộ NPP)
