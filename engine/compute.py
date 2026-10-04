@@ -85,13 +85,16 @@ la, lo = m.lat_to, m.long_to
 pla = la.groupby(m.PlanNumber).shift(); plo = lo.groupby(m.PlanNumber).shift()
 _h = np.sin(np.radians(pla - la) / 2) ** 2 + np.cos(np.radians(la)) * np.cos(np.radians(pla)) * np.sin(np.radians(lo - plo) / 2) ** 2
 m['dist_oo'] = 2 * 6371000 * np.arcsin(np.sqrt(_h))
-m['dt_bad'] = (m.time_outlet_outlet < TH['dt_gap_min']) & (m.dist_oo > TH['dt_dist_min'])
+# Đơn của tài khoản DSA không xét Distance & Time (outlet tới outlet) — cập nhật 04/10/2026
+m['dt_scope'] = m.utype.ne('DSA')
+m['dt_bad'] = m.dt_scope & (m.time_outlet_outlet < TH['dt_gap_min']) & (m.dist_oo > TH['dt_dist_min'])
 pl = m.groupby('PlanNumber').agg(npp=('TenantName', 'first'), orders=('OrderNumber', 'count'),
-                                 bad=('dt_bad', 'sum'), w=('Assigned_Weight', 'sum'),
+                                 bad=('dt_bad', 'sum'), dt_n=('dt_scope', 'sum'), w=('Assigned_Weight', 'sum'),
                                  cap=('TruckCapacityWeight', 'max'), capmin=('TruckCapacityWeight', 'min'),
                                  truck=('DriverName', 'first'), user=('username', 'first'),
                                  date=('Date', 'min'))
-pl['dt_fail'] = pl.bad / pl.orders > TH['dt_route_pct']
+pl['dt_in'] = pl.dt_n > 0                                   # chuyến có ít nhất 1 đơn không phải DSA
+pl['dt_fail'] = pl.dt_in & (pl.bad / pl.dt_n.where(pl.dt_n > 0, 1) > TH['dt_route_pct'])
 pl['ratio'] = (pl.w / pl.cap).round(3)
 pl['pl_fail'] = (pl.w / pl.cap) >= TH['payload_ratio']
 m = m.merge(pl[['dt_fail', 'ratio', 'pl_fail']].rename(columns={'dt_fail': 'plan_dt_fail', 'ratio': 'plan_ratio', 'pl_fail': 'plan_pl_fail'}),
@@ -168,7 +171,7 @@ def score(d, p, name):
     otf = int(d.f_ot.sum())
     t24s = int(d.t24_scope.sum()); t24f = int(d.f_24.sum())
     cds = int(d.cd_scope.sum()); cdf = int(d.f_cd.sum())
-    dtr = int(p.dt_fail.sum()); plf = int(p.pl_fail.sum())
+    dtr = int(p.dt_fail.sum()); plf = int(p.pl_fail.sum()); dtn = int(p.dt_in.sum()); dts = int(d.dt_scope.sum())
     r = dict(npp=name, orders=n, plans=np_,
              date_min=str(d.Date.min().date()), date_max=str(d.Date.max().date()),
              username_pct=pct(n - int(d.f_user.sum()), n), username_fail=int(d.f_user.sum()),
@@ -184,8 +187,8 @@ def score(d, p, name):
              h24_bins=[int(x) for x in [(d.h24_scope & (d.h24_dur < 0)).sum(), ((d.h24_dur >= 0) & (d.h24_dur <= 12)).sum(),
                        ((d.h24_dur > 12) & (d.h24_dur <= 24)).sum(), ((d.h24_dur > 24) & (d.h24_dur <= 48)).sum(),
                        ((d.h24_dur > 48) & (d.h24_dur <= 72)).sum(), (d.h24_dur > 72).sum()]],
-             dt_orders_fail=int(d.f_dt.sum()), dt_pct=pct(n - int(d.f_dt.sum()), n),
-             dt_routes_any=int((p.bad > 0).sum()), dt_routes_fail=dtr, dt_route_fail_pct=pct(dtr, np_),
+             dt_orders_fail=int(d.f_dt.sum()), dt_pct=pct(dts - int(d.f_dt.sum()), dts), dt_scope_orders=dts, dt_excl_orders=n - dts,
+             dt_routes_any=int((p.bad > 0).sum()), dt_routes_fail=dtr, dt_plans=dtn, dt_excl_plans=np_ - dtn, dt_route_fail_pct=pct(dtr, dtn),
              payload_plans_fail=plf, pl_orders=int(d.f_pl.sum()), payload_pct=pct(np_ - plf, np_),
              payload_max_ratio=float(p.ratio.max()) if np_ else 0,
              cd_scope=cds, cd_fail=cdf, cd_pct=pct(cds - cdf, cds), cd_unmatched=n - cds,
@@ -198,7 +201,7 @@ def score(d, p, name):
     r['payload_fail_pct'] = pct(plf, np_)
     # --- KẾT QUẢ DATA ACCURACY: 4 tiêu chí theo file chính thức ---
     r['v_username'] = 'PASS' if uw == 0 else 'FAIL'
-    r['v_dt'] = 'PASS' if r['dt_route_fail_pct'] < TH['dt_month_pct'] * 100 else 'FAIL'
+    r['v_dt'] = 'PASS' if (r['dt_route_fail_pct'] or 0) < TH['dt_month_pct'] * 100 else 'FAIL'
     r['v_created'] = 'PASS' if cdr == 0 else 'FAIL'
     r['v_payload'] = 'PASS' if r['payload_fail_pct'] < TH['payload_tol'] * 100 else 'FAIL'
     keys = ['v_payload', 'v_dt', 'v_created', 'v_username']
@@ -221,7 +224,7 @@ def score(d, p, name):
     r['ord_err_pct'] = pct(int(d.any_err.sum()), n)
     # biên an toàn
     geo_need = math.ceil(TH['geo'] / 100 * gs); ot_need = math.floor(TH['ontime'] / 100 * n) + 1
-    dt_allow = math.ceil(TH['dt_month_pct'] * np_) - 1
+    dt_allow = max(0, math.ceil(TH['dt_month_pct'] * dtn) - 1)
     pl_allow = math.ceil(TH['payload_tol'] * np_) - 1
     r['margin'] = dict(geo_ok=gs - gf, geo_need=geo_need, geo_margin=(gs - gf) - geo_need, geo_ci=wilson(gs - gf, gs),
                        ot_ok=n - otf, ot_need=ot_need, ot_margin=(n - otf) - ot_need, ot_ci=wilson(n - otf, n),
@@ -253,7 +256,7 @@ def daily(d):
                         plans=int(g.PlanNumber.nunique()), pfail=int(g[g.plan_fail].PlanNumber.nunique()),
                         pfail_pct=pct(g[g.plan_fail].PlanNumber.nunique(), g.PlanNumber.nunique()),
                         dtr=int(g[g.plan_dt_fail].PlanNumber.nunique()),
-                        dtr_pct=pct(g[g.plan_dt_fail].PlanNumber.nunique(), g.PlanNumber.nunique()),
+                        dtr_pct=pct(g[g.plan_dt_fail].PlanNumber.nunique(), g[g.dt_scope].PlanNumber.nunique()),
                         cd=int(g.f_cd.sum())))
     return out
 daily_d = {'ALL': daily(m), **{n: daily(m[m.TenantName == n]) for n in NPPS}}
@@ -341,7 +344,7 @@ errors = [[cell(v) for v in row] for row in E[ECOLS].itertuples(index=False)]
 
 # ---------- top chuyến ----------
 dt_top = pl[pl.dt_fail].sort_values('bad', ascending=False).reset_index()
-dt_top = [dict(plan=r.PlanNumber, npp=r.npp, truck=r.truck, user=r.user, orders=int(r.orders), bad=int(r.bad),
+dt_top = [dict(plan=r.PlanNumber, npp=r.npp, truck=r.truck, user=r.user, orders=int(r.dt_n), bad=int(r.bad),
                date=r.date.strftime('%d/%m')) for r in dt_top.itertuples()]
 pl_top = pl[pl.pl_fail].sort_values('ratio', ascending=False).reset_index()
 pl_top = [dict(plan=r.PlanNumber, npp=r.npp, truck=r.truck, orders=int(r.orders), weight=round(r.w, 2),

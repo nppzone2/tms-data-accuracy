@@ -49,7 +49,7 @@ Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lị
 | Tiêu chí | Lỗi | NPP đạt khi |
 |---|---|---|
 | Payload | chuyến có tổng tải / tải trọng xe ≥ 1,5 | chuyến quá tải < 5% tổng chuyến |
-| Distance & Time | đơn có `time_outlet_outlet` < 2 phút và cách outlet trước > 10m; chuyến hỏng khi đơn đúng < 70% | chuyến hỏng < 5% tổng chuyến |
+| Distance & Time | đơn có `time_outlet_outlet` < 2 phút và cách outlet trước > 10m; chuyến hỏng khi đơn đúng < 70%; **không tính đơn tài khoản DSA** | chuyến hỏng < 5% tổng chuyến (không tính chuyến chỉ có DSA) |
 | Created Date | đơn tạo (Fill Rate `Sent_To_distributor`, ghép `DocNo = OrderNumber`) sau giờ giao; 1 đơn lỗi là chuyến lỗi | 0 chuyến lỗi |
 | User name | tài khoản không phải SĐT, biển số xe hoặc DSA | 0 tài khoản sai |
 

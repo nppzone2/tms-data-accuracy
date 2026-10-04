@@ -359,7 +359,7 @@ const DA=[
  {k:'payload',n:'Payload',v:s=>pc(s.payload_fail_pct),ok:s=>s.v_payload,th:`Ngưỡng < ${T_PL}% chuyến`,
   sub:s=>`${fmt(s.payload_plans_fail)}/${fmt(s.plans)} chuyến quá tải`,bar:s=>[s.payload_fail_pct,T_PL]},
  {k:'dt',n:'Distance & Time',v:s=>pc(s.dt_route_fail_pct),ok:s=>s.v_dt,th:`Ngưỡng < ${T_DT}% chuyến`,
-  sub:s=>`${fmt(s.dt_routes_fail)}/${fmt(s.plans)} chuyến lỗi`,bar:s=>[s.dt_route_fail_pct,T_DT]},
+  sub:s=>`${fmt(s.dt_routes_fail)}/${fmt(s.dt_plans??s.plans)} chuyến lỗi · không tính DSA`,bar:s=>[s.dt_route_fail_pct,T_DT]},
  {k:'created',n:'Created Date',v:s=>`${fmt(s.cd_routes_fail)}<small>chuyến</small>`,ok:s=>s.v_created,th:'Ngưỡng 0 chuyến',
   sub:s=>`${fmt(s.cd_fail)} đơn tạo sau khi giao`},
  {k:'username',n:'User name',v:s=>`${fmt(s.users_wrong)}<small>tài khoản</small>`,ok:s=>s.v_username,th:'Ngưỡng 0 tài khoản sai',
@@ -391,7 +391,7 @@ function tile(c,s,all,track){
 function gaps(s){
   const g=[], m=s.margin;
   if(s.v_payload==='FAIL') g.push([-m.pl_margin,'chuyến',`Payload: giảm ${fmt(-m.pl_margin)} chuyến quá tải (tối đa ${fmt(m.pl_allow)} chuyến).`]);
-  if(s.v_dt==='FAIL') g.push([-m.dt_margin,'chuyến',`Distance & Time: giảm ${fmt(-m.dt_margin)} chuyến lỗi (tối đa ${fmt(m.dt_allow)} chuyến).`]);
+  if(s.v_dt==='FAIL') g.push([-m.dt_margin,'chuyến',`Distance & Time: giảm ${fmt(-m.dt_margin)} chuyến lỗi (tối đa ${fmt(m.dt_allow)} chuyến, không tính DSA).`]);
   if(s.v_created==='FAIL') g.push([s.cd_routes_fail,'chuyến',`Created Date: rà ${fmt(s.cd_fail)} đơn tạo sau khi giao. Không cho phép chuyến nào.`]);
   if(s.v_username==='FAIL') g.push([s.users_wrong,'tài khoản',`User name: đổi sang SĐT, biển số xe hoặc tài khoản DSA.`]);
   return g.sort((a,b)=>a[0]-b[0]);
@@ -479,7 +479,7 @@ function pKpi(){
   }
   if(k==='dt'){
     h+=top(all?byNpp(x=>x.dt_route_fail_pct,{thr:T_DT,max:capMax(x=>x.dt_route_fail_pct,T_DT),bad:x=>x.v_dt==='FAIL'}):'');
-    h+=sec('Chuyến lỗi Distance & Time',`Đơn lỗi: cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi.`,
+    h+=sec('Chuyến lỗi Distance & Time',`Đơn lỗi: cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi. Không tính đơn tài khoản DSA${s.dt_excl_plans!=null?` (loại ${fmt(s.dt_excl_orders)} đơn, ${fmt(s.dt_excl_plans)} chuyến chỉ có DSA)`:''}.`,
       table([['Chuyến'],['NPP'],['Ngày'],['Tài khoản'],['Đơn','n'],['Đơn lỗi','n'],['Tỷ lệ','n']],rowsIn(DATA.dt_top).map(r=>plRow(r)+`<td class="mono">${esc(r.user)}</td><td class="n">${fmt(r.orders)}</td><td class="n">${fmt(r.bad)}</td><td class="n cno">${pc(r.bad/r.orders*100,0)}</td></tr>`)));
   }
   if(k==='created'){
@@ -596,7 +596,7 @@ function pLogic(){
   const W=`${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00`;
   const R=[
    ['Payload',`< ${T_PL}% chuyến`,`Chuyến lỗi khi tổng tải / tải trọng xe ≥ ${TH.payload_ratio}.`],
-   ['Distance & Time',`< ${T_DT}% chuyến`,`Đơn lỗi khi cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi.`],
+   ['Distance & Time',`< ${T_DT}% chuyến`,`Đơn lỗi khi cách outlet trước < ${TH.dt_gap_min} phút và > ${TH.dt_dist_min}m. Chuyến lỗi khi > ${TH.dt_route_pct*100}% đơn lỗi. Không tính đơn tài khoản DSA; chuyến chỉ có đơn DSA không đưa vào mẫu số.`],
    ['Created Date','0 chuyến','Đơn lỗi khi tạo sau giờ giao (<code>Sent_To_distributor</code> > <code>DeliverDateTime</code>). 1 đơn lỗi là chuyến lỗi.'],
    ['User name','0 tài khoản sai','Tài khoản phải là SĐT 10 số, biển số xe hoặc tài khoản DSA.']];
   const T=[
