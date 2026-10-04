@@ -1,7 +1,7 @@
 {
   "_ghi_chu": "Khoảng ngày loại trừ khỏi TOÀN BỘ KPI (theo cột Date của file TMS). Thêm/bớt dòng rồi commit để trang tự dựng lại.",
   "exclude_dates": [
-    {"from": "2026-09-16", "to": "2026-09-23", "note": ""}
+    {"from": "2026-09-16", "to": "2026-09-23", "note": "Lỗi hệ thống do update Portal 4X"}
   ],
   "completed_months_shown": 3
 }
