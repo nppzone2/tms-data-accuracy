@@ -772,7 +772,7 @@ const sel=$('#scope');sel.hidden=role!=='admin';
 fillScope();
 $('#login').hidden=true;$('#app').hidden=false;
 const want=(location.hash||'').slice(1);
-page=PAGES.some(p=>p[0]===want)&&(want!=='dq'||role==='admin')?want:(DONE.length?'months':'overview');
+page=PAGES.some(p=>p[0]===want)&&(want!=='dq'||role==='admin')?want:'overview';
 render();
 $('#logout').addEventListener('click',()=>{try{history.replaceState(null,'',location.pathname);}catch(_){}location.reload();});
 }
