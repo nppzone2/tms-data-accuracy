@@ -26,8 +26,14 @@ ORDER = sorted(MONTHS)
 DONE = [m for m in MM.get('completed', ORDER) if m in MONTHS]   # tháng đã hoàn thành
 CUR = MM.get('current')
 auth = {}
+for m_ in ORDER:                     # mã NPP (DisCode); tháng thiếu mã thì lấy từ tháng khác
+    auth.update({k: v for k, v in MONTHS[m_].pop('auth').items() if v})
 for d in MONTHS.values():
-    auth.update(d.pop('auth'))       # mật khẩu mặc định (DisCode) — không bao giờ đưa vào trang
+    for n, i in d['npp_info'].items():
+        if not i.get('code') and n in auth: i['code'] = auth[n]
+miss = sorted({n for d in MONTHS.values() for n in d['npps']} - set(auth))
+if miss:
+    print('Cảnh báo: chưa có mã NPP (không có trong Fill Rate) nên chưa tạo đăng nhập cho:', ', '.join(miss), '— admin vẫn xem được.')
 NPPS = sorted(auth)
 
 admin_pw = os.environ.get('ADMIN_PASSWORD', '').strip()
@@ -64,7 +70,7 @@ def slice_for(data, n):
              users={'ALL': keep(data['users']['ALL'])},
              dt_top=keep(data['dt_top']), pl_top=keep(data['pl_top']), cd_list=keep(data['cd_list']),
              plan_list=keep(data['plan_list']), late_list=keep(data.get('late_list', [])))
-    d['meta'] = dict(data['meta'], npps=1)
+    d['meta'] = dict(data['meta'], npps=1, fill_gap=[x for x in data['meta'].get('fill_gap', []) if x['npp'] == n])
     return d
 
 blobs = {'admin': seal(dict(__role='admin', order=ORDER, completed=DONE, current=CUR, months=MONTHS), admin_pw)}

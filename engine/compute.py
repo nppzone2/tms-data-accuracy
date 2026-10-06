@@ -239,10 +239,21 @@ total = score(m, pl, 'TỔNG')
 info = (m.dropna(subset=['DisCode']).groupby('TenantName')
         .agg(code=('DisCode', 'first'), name=('Distributor_Name', 'first'), area=('Area_Name', 'first'),
              region=('Region', 'first')))
-npp_info = {n: dict(code=str(int(info.loc[n, 'code'])),
-                    name=re.sub(r'^[A-Z0-9]+-', '', info.loc[n, 'name']),
-                    area=info.loc[n, 'area'], region=info.loc[n, 'region']) for n in NPPS}
-auth = {n: npp_info[n]['code'] for n in NPPS}
+def _info(n):
+    if n in info.index:
+        return dict(code=str(int(info.loc[n, 'code'])), name=re.sub(r'^[A-Z0-9]+-', '', info.loc[n, 'name']),
+                    area=info.loc[n, 'area'], region=info.loc[n, 'region'])
+    g = m[m.TenantName == n]   # NPP không có trong file Fill Rate: thiếu mã NPP, tên lấy từ TMS
+    return dict(code=None, name=n, area=str(g.Region.iloc[0]) if 'Region' in g and len(g) else '', region=str(g.Region.iloc[0]) if len(g) else '')
+npp_info = {n: _info(n) for n in NPPS}
+auth = {n: npp_info[n]['code'] for n in NPPS if npp_info[n]['code']}
+# NPP có ít đơn ghép được với Fill Rate -> Created Date / 24H thiếu dữ liệu
+fill_gap = []
+for n in NPPS:
+    g = m[m.TenantName == n]; c = round(100 * g.Sent_To_distributor.notna().mean(), 1) if len(g) else 0
+    if c < 50:
+        fill_gap.append(dict(npp=n, matched_pct=c, orders=int(len(g))))
+        print(f'Cảnh báo: NPP {n} chỉ ghép được {c}% đơn với Fill Rate ({len(g):,} đơn) — kiểm tra file Fill Rate')
 
 # ---------- theo ngày ----------
 m['day'] = m.Date.dt.strftime('%d/%m')
@@ -399,7 +410,7 @@ DATA = dict(
     meta=dict(period=f'{m.Date.min():%d/%m/%Y} – {m.Date.max():%d/%m/%Y}', orders=n_file, plans=len(pl),
               npps=len(NPPS), bu=m.BU.iloc[0], regions=sorted(m.Region.unique().tolist()),
               src='TMS_Order_Detail.xlsx + Fill_Rate.xlsx', built=(datetime.utcnow()+pd.Timedelta(hours=7)).strftime('%d/%m/%Y %H:%M'),
-              days=int(m.Date.dt.normalize().nunique()), excluded=EXCL),
+              days=int(m.Date.dt.normalize().nunique()), excluded=EXCL, fill_gap=fill_gap),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
     dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, dq=dq, sens=sens)

@@ -411,6 +411,7 @@ function todoList(s){
 function notes(){
   let n='';
   if(month===CUR) n+=`<span class="chip warn">Current · số liệu tạm tính</span> `;
+  (DATA.meta.fill_gap||[]).filter(x=>scope==='ALL'||x.npp===scope).forEach(x=>{n+=`<span class="chip warn">${esc(x.npp)}: thiếu Fill Rate (${x.matched_pct}% đơn khớp) · Created Date, 24H chưa đủ dữ liệu</span> `;});
   (DATA.meta.excluded||[]).forEach(x=>{n+=`<span class="chip na">Loại trừ ${esc(x.start.slice(0,5))}–${esc(x.end)} · ${fmt(x.orders)} đơn${x.note?' · '+esc(x.note):''}</span> `;});
   return n?`<div style="display:flex;flex-wrap:wrap;gap:6px">${n}</div>`:'';
 }

@@ -57,6 +57,29 @@ def unpack(data, dest):
     dest.mkdir(parents=True, exist_ok=True)
     zipfile.ZipFile(io.BytesIO(data)).extractall(dest)
 
+def tag(p, word):
+    """Phần tên file ngoài chữ TMS Order Detail / Fill Rate, dùng để ghép cặp (vd. _20261005)."""
+    return re.sub(word, '', norm(p.stem))
+
+def pick_pairs(files):
+    """Ghép từng file TMS với file Fill Rate cùng hậu tố; nếu một tháng có nhiều cặp thì lấy cặp có dữ liệu mới nhất."""
+    tms = [p for p in files if is_tms(p)]; fill = [p for p in files if is_fill(p)]
+    other = [p.name for p in files if p not in tms and p not in fill]
+    if not tms or not fill or other:
+        sys.exit(f'LỖI: input/ cần file TMS Order Detail và file Fill Rate, đang có: {[p.name for p in files]}')
+    best = {}
+    for tf in tms:
+        ff = [x for x in fill if tag(x, 'fillrate|fill') == tag(tf, 'tmsorderdetail|tms')]
+        if not ff and len(tms) == 1 and len(fill) == 1: ff = fill
+        if len(ff) != 1:
+            sys.exit(f'LỖI: không ghép được file Fill Rate cho {tf.name}. Đặt tên 2 file cùng hậu tố, vd. "TMS Order Detail_20261005.xlsx" và "Fill Rate_20261005.xlsx".')
+        d = pd.to_datetime(pd.read_excel(tf, header=2, usecols=['Date'])['Date'], errors='coerce')
+        m = d.dt.strftime('%Y-%m').mode().iloc[0]
+        rank = (d.max(), len(d))
+        if m in best: print(f'Tháng {m} có nhiều bộ file, so sánh {best[m][2].name} với {tf.name}')
+        if m not in best or rank > best[m][0]: best[m] = (rank, tf, ff[0])
+    return [(m, tf, ff) for m, (_, tf, ff) in sorted(best.items())]
+
 def prepare():
     shutil.rmtree(WORK, ignore_errors=True); shutil.rmtree(BUILD, ignore_errors=True)
     WORK.mkdir(parents=True); BUILD.mkdir(parents=True)
@@ -77,14 +100,11 @@ def prepare():
     # 2. file mới tải lên
     new = [p for p in INPUT.glob('*.xlsx') if not p.name.startswith('~$')]
     if new:
-        t = [p for p in new if is_tms(p)]; f = [p for p in new if is_fill(p)]
-        if len(t) != 1 or len(f) != 1:
-            sys.exit(f'LỖI: thư mục input/ cần đúng 1 file TMS và 1 file Fill Rate, đang có: {[p.name for p in new]}')
-        m = month_of(t[0])
-        dest = WORK / m
-        shutil.rmtree(dest, ignore_errors=True); dest.mkdir(parents=True)
-        for p in (t[0], f[0]): shutil.copy2(p, dest / p.name)
-        changed.add(m); print(f'Nhận dữ liệu mới cho tháng {m}: {t[0].name}, {f[0].name}')
+        for m, tf, ff in pick_pairs(new):
+            dest = WORK / m
+            shutil.rmtree(dest, ignore_errors=True); dest.mkdir(parents=True)
+            for p in (tf, ff): shutil.copy2(p, dest / p.name)
+            changed.add(m); print(f'Nhận dữ liệu mới cho tháng {m}: {tf.name}, {ff.name}')
     months = sorted(p.name for p in WORK.iterdir() if p.is_dir() and re.fullmatch(r'\d{4}-\d{2}', p.name))
     if not months:
         sys.exit('LỖI: chưa có dữ liệu. Hãy tải 2 file TMS Order Detail và Fill Rate vào input/.')
