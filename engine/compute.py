@@ -113,7 +113,9 @@ m['f_cd'] = m.cd_scope & (m.cd_gap_h < 0)
 #   tạo thứ 7 từ 17:00 thì bắt đầu 00:00 thứ 2 (trừ khi giao vào Chủ nhật: bắt đầu 00:00 Chủ nhật).
 # Chủ nhật là ngày nghỉ: nếu đơn KHÔNG giao vào Chủ nhật thì trừ phần thời gian rơi vào Chủ nhật.
 #   Nếu giao vào Chủ nhật thì thời lượng = giờ giao - giờ bắt đầu, không trừ.
-# Thời lượng âm (tạo sau khi giao) là Fail. Giao sau 20:00:00 là lỗi Working Hour.
+# Thời lượng âm (tạo sau khi giao) là Fail.
+# Giao sau 20:00:00 nhưng vẫn trong 24H thì vẫn ĐẠT (13/10/2026). Chỉ khi không có giờ tạo đơn
+#   (không đo được 24H) thì giao sau 20:00 mới tính chưa đạt.
 TH.update(sla_hours=24, send_cutoff=17, wh_end=20)
 send, dlv = m.Sent_To_distributor, m.DeliverDateTime
 m['h24_scope'] = send.notna() & dlv.notna()
@@ -136,7 +138,8 @@ m['h24_dur'] = [_dur(a, b) for a, b in zip(send, dlv)]
 m['h24_fail'] = m.h24_scope & ~((m.h24_dur >= 0) & (m.h24_dur <= TH['sla_hours']))
 m['wh_fail'] = dlv.notna() & ((dlv.dt.hour > TH['wh_end']) | ((dlv.dt.hour == TH['wh_end']) & ((dlv.dt.minute > 0) | (dlv.dt.second > 0))))
 m['t24_scope'] = dlv.notna()
-m['f_24'] = m.h24_fail | m.wh_fail
+m['wh_24'] = m.wh_fail & ~m.h24_scope        # giao sau 20:00 làm hỏng 24H chỉ khi không đo được 24H
+m['f_24'] = m.h24_fail | m.wh_24
 
 # On time và 24H đo năng lực giao hàng, KHÔNG tính là lỗi đơn (04/10/2026).
 m['any_err'] = m[['f_user', 'f_geo', 'f_dt', 'f_pl', 'f_cd']].any(axis=1)
@@ -182,7 +185,7 @@ def score(d, p, name):
              ot_fail=otf, ot_pct=pct(n - otf, n),
              succ_fail=otf, succ_pct=pct(n - otf, n),
              t24_scope=t24s, t24_fail=t24f, t24_pct=pct(t24s - t24f, t24s),
-             h24_scope=int(d.h24_scope.sum()), h24_fail=int(d.h24_fail.sum()), wh_fail=int(d.wh_fail.sum()),
+             h24_scope=int(d.h24_scope.sum()), h24_fail=int(d.h24_fail.sum()), wh_fail=int(d.wh_fail.sum()), wh_24=int(d.wh_24.sum()),
              h24_na=int((~d.h24_scope).sum()),
              h24_bins=[int(x) for x in [(d.h24_scope & (d.h24_dur < 0)).sum(), ((d.h24_dur >= 0) & (d.h24_dur <= 12)).sum(),
                        ((d.h24_dur > 12) & (d.h24_dur <= 24)).sum(), ((d.h24_dur > 24) & (d.h24_dur <= 48)).sum(),
@@ -327,7 +330,7 @@ def late_why(r):
                                     ('chưa có giờ giao' if pd.isna(r.DeliverDateTime) else 'theo SLA của TMS')))
     if r.h24_fail:
         rs.append('24H: tạo sau khi giao' if r.h24_dur < 0 else f'24H: {r.h24_dur:.1f} giờ (quá {TH["sla_hours"]} giờ)')
-    if r.wh_fail: rs.append(f'Giao sau {TH["wh_end"]}:00 (lúc {r.DeliverDateTime:%H:%M})')
+    if r.wh_24: rs.append(f'24H: giao sau {TH["wh_end"]}:00 (lúc {r.DeliverDateTime:%H:%M}), không có giờ tạo đơn')
     return '; '.join(rs)
 
 LT = m[m.late].sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
@@ -335,7 +338,7 @@ late_list = [dict(npp=r.TenantName, day=r.Date.strftime('%d/%m'), plan=r.PlanNum
                   created=fmt_dt(r.Sent_To_distributor), delivered=fmt_dt(r.DeliverDateTime),
                   promised=r.PromisedDate.strftime('%d/%m') if pd.notna(r.PromisedDate) else '',
                   hours=None if pd.isna(r.h24_dur) else round(float(r.h24_dur), 1),
-                  ot=bool(r.f_ot), h24=bool(r.h24_fail), wh=bool(r.wh_fail), why=late_why(r)) for r in LT.itertuples()]
+                  ot=bool(r.f_ot), h24=bool(r.h24_fail), wh=bool(r.wh_24), why=late_why(r)) for r in LT.itertuples()]
 
 E = m[m.any_err].copy()
 lr = E.apply(why, axis=1)

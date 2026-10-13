@@ -373,7 +373,7 @@ TRK.push({k:'dsa',n:'Đơn duyệt bởi DSA',info:1,v:s=>pc(dsaP(s),1),ok:()=>'
 /* Năng lực giao hàng: không phải lỗi, không tính vào kết quả */
 const CAP=[
  {k:'ontime',n:'On time',v:s=>pc(s.ot_pct,1),ok:s=>s.v_ontime,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.ot_fail)} đơn giao trễ hạn`},
- {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} đơn quá 24H · ${fmt(s.wh_fail)} giao sau ${TH.wh_end}:00`}];
+ {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} đơn quá 24H${s.wh_24?` · ${fmt(s.wh_24)} giao sau ${TH.wh_end}:00 không có giờ tạo`:''}`}];
 const DRV=[['Geo'],['D&T'],['Payload'],['Created Date'],['User']];
 const capNote=v=>v==='PASS'?'<span class="chip na">Trên tham chiếu</span>':'<span class="chip warn">! Dưới tham chiếu</span>';
 
@@ -516,8 +516,8 @@ function pKpi(){
   }
   if(k==='h24'){
     h+=top(all?byNpp(x=>x.t24_pct,{thr:TH.ontime,max:100,neutral:1,bad:x=>x.v_24!=='PASS'}):'');
-    h+=sec('Đơn chưa đạt 24H theo nguyên nhân',`Quá ${TH.sla_hours} giờ SLA hoặc giao sau ${TH.wh_end}:00. "Không xét": thiếu giờ tạo hoặc giờ giao.`,
-      table([['NPP'],['Đơn xét','n'],['Chưa đạt','n'],['Quá 24H','n'],[`Sau ${TH.wh_end}:00`,'n'],['Không xét','n'],['Tỷ lệ đạt','n']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.t24_scope)}</td><td class="n">${fmt(x.t24_fail)}</td><td class="n">${fmt(x.h24_fail)}</td><td class="n">${fmt(x.wh_fail)}</td><td class="n">${fmt(x.h24_na)}</td><td class="n">${pc(x.t24_pct)}</td></tr>`)));
+    h+=sec('Đơn chưa đạt 24H theo nguyên nhân',`Quá ${TH.sla_hours} giờ SLA. Giao sau ${TH.wh_end}:00 vẫn đạt nếu trong ${TH.sla_hours} giờ; cột "Sau ${TH.wh_end}:00" chỉ để tham khảo. "Không xét": thiếu giờ tạo hoặc giờ giao.`,
+      table([['NPP'],['Đơn xét','n'],['Chưa đạt','n'],['Quá 24H','n'],[`Sau ${TH.wh_end}:00 (tham khảo)`,'n'],['Không xét','n'],['Tỷ lệ đạt','n']],(all?DATA.scorecard:[s]).map(x=>`<tr><th scope="row">${x.npp}</th><td class="n">${fmt(x.t24_scope)}</td><td class="n">${fmt(x.t24_fail)}</td><td class="n">${fmt(x.h24_fail)}</td><td class="n">${fmt(x.wh_fail)}</td><td class="n">${fmt(x.h24_na)}</td><td class="n">${pc(x.t24_pct)}</td></tr>`)));
     const L=['Âm','0–12h','12–24h','24–48h','48–72h','> 72h'], hr=DATA.hours[scope], over=it=>it.l==='Âm'||it.l.startsWith('24')||it.l.startsWith('48')||it.l.startsWith('>');
     h+=`<div class="grid2">${sec('Thời gian giao tính SLA','Đã quy đổi mốc 17:00 và trừ Chủ nhật. Cột đậm: quá 24H; "Âm": tạo sau khi giao.',vbar(s.h24_bins.map((v,i)=>({l:L[i],v})),{color:'var(--s3)',hl2:over}))}
       ${sec('Giờ hoàn tất',`Cột đậm: từ ${TH.wh_end}h trở đi.`,vbar(hr.map((v,i)=>({l:i+'h',v})),{color:'var(--s3)',hl2:it=>parseInt(it.l)>=TH.wh_end}))}</div>`;
@@ -620,7 +620,7 @@ function pLogic(){
    ['Đơn duyệt bởi DSA','Không có ngưỡng','Tỷ lệ và số đơn có tài khoản giao hàng là tài khoản kho (DSA). Đơn DSA không xét Geo và Distance & Time.']];
   const C=[
    ['On time',`Tham chiếu > ${TH.ontime}%`,'Theo cột <code>is_ontime</code> của TMS. Successful dùng chung kết quả.'],
-   ['On time 24H',`Tham chiếu > ${TH.ontime}%`,`Từ lúc tạo đơn đến lúc giao ≤ ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00, giao hôm sau: tính từ 00:00 hôm sau (thứ 7 → thứ 2). Trừ Chủ nhật nếu không giao Chủ nhật. Giao sau ${TH.wh_end}:00 tính là chưa đạt.`]];
+   ['On time 24H',`Tham chiếu > ${TH.ontime}%`,`Từ lúc tạo đơn đến lúc giao ≤ ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00, giao hôm sau: tính từ 00:00 hôm sau (thứ 7 → thứ 2). Trừ Chủ nhật nếu không giao Chủ nhật. Giao sau ${TH.wh_end}:00 vẫn đạt nếu trong ${TH.sla_hours} giờ.`]];
   let h=`<section class="card"><div><h2>Cách tính kết quả tháng</h2><p class="sub">Theo file chấm Data Accuracy chính thức.</p></div>
     <div class="flow"><div><span class="lbl">Bước 1</span><b>Đơn lỗi</b><span class="sub">Ghi nhận lỗi theo từng tiêu chí.</span></div>
     <div><span class="lbl">Bước 2</span><b>Chuyến lỗi</b><span class="sub">Gộp đơn lỗi theo chuyến (PlanNumber).</span></div>
