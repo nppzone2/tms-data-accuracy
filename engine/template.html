@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap">
 <style>
-/* Layout: dải tiêu đề xanh đậm + tab; nội dung một cột tối đa 1200px: kết luận → 4 tiêu chí → theo dõi → bảng điểm → ưu tiên xử lý */
+/* Layout: dải tiêu đề xanh đậm + tab; nội dung một cột tối đa 1200px: kết luận → 4 tiêu chí đánh giá dữ liệu → năng lực giao hàng → theo dõi → bảng điểm → ưu tiên xử lý */
 :root{
   --bg:#f2f5f1; --surface:#ffffff; --sunk:#edf2ec; --ink:#10261a; --muted:#5a6b60; --line:#dce5da;
   --brand:#007a33; --brand-deep:#0c3a1d; --brand-lt:#e2f1e5; --leaf:#78b800; --ff:#5f9200; --on-brand:#ffffff;
@@ -373,7 +373,6 @@ const DA=[
  {k:'username',n:'User name',v:s=>`${fmt(s.users_wrong)}<small>tài khoản</small>`,ok:s=>s.v_username,th:'Ngưỡng 0 tài khoản sai',
   sub:s=>`${fmt(s.users_total)} tài khoản giao hàng`}];
 const TRK=[
- {k:'geo',n:'Geo Compliance',v:s=>pc(s.geo_pct,1),ok:s=>s.v_geo,th:`Mức tham chiếu ≥ ${TH.geo}%`,sub:s=>`${fmt(s.geo_fail)} đơn lỗi`},
  {k:'plan',n:`Chuyến lỗi > ${T_PLAN}%`,v:s=>pc(s.plan_fail_pct,1),ok:s=>s.v_plan,th:`Mức tham chiếu ≤ ${T_TOL}%`,sub:s=>`${fmt(s.plan_fail)}/${fmt(s.plans)} chuyến, mọi loại lỗi`}];
 /* Đơn duyệt bởi tài khoản DSA: chỉ để theo dõi, không có ngưỡng */
 const dsaN=s=>(s.user_types||{}).DSA||0, dsaP=s=>s.orders?dsaN(s)/s.orders*100:0;
@@ -381,7 +380,8 @@ TRK.push({k:'dsa',n:'Đơn duyệt bởi DSA',info:1,v:s=>pc(dsaP(s),1),ok:()=>'
 /* Năng lực giao hàng: không phải lỗi, không tính vào kết quả */
 const CAP=[
  {k:'ontime',n:'On time',v:s=>pc(s.ot_pct,1),ok:s=>s.v_ontime,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.ot_fail)} đơn giao trễ hạn`},
- {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} đơn quá 24H${s.wh_24?` · ${fmt(s.wh_24)} giao sau ${TH.wh_end}:00 không có giờ tạo`:''}`}];
+ {k:'h24',n:'On time 24H',v:s=>pc(s.t24_pct,1),ok:s=>s.v_24,th:`Tham chiếu > ${TH.ontime}%`,sub:s=>`${fmt(s.h24_fail)} đơn quá 24H${s.wh_24?` · ${fmt(s.wh_24)} giao sau ${TH.wh_end}:00 không có giờ tạo`:''}`},
+ {k:'geo',n:'Geo Compliance',v:s=>pc(s.geo_pct,1),ok:s=>s.v_geo,th:`Mức tham chiếu ≥ ${TH.geo}%`,sub:s=>`${fmt(s.geo_fail)} đơn lỗi`}];
 const DRV=[['Geo'],['D&T'],['Payload'],['Created Date'],['User']];
 const capNote=v=>v==='PASS'?'<span class="chip na">Trên tham chiếu</span>':'<span class="chip warn">! Dưới tham chiếu</span>';
 
@@ -440,9 +440,9 @@ function pOverview(){
       <div style="display:grid;gap:4px;min-width:0"><div class="lbl">NPP ${esc(scope)} · ${esc(DATA.meta.period)}</div><h2>${esc(inf.name)}</h2>
       <p class="sub">${esc(inf.area)} · ${fmt(s.orders)} đơn · ${fmt(s.plans)} chuyến${s.n_fail?` · trượt ${s.n_fail}/4 tiêu chí`:''}</p>${notes()}</div></div></section>`;
   }
-  h+=`<section class="card"><div class="ch"><div><h2>4 tiêu chí xét kết quả</h2><p class="sub">Trượt 1 tiêu chí là không đạt tháng.</p></div></div><div class="kpis">${DA.map(c=>tile(c,s,all,false)).join('')}</div></section>`;
+  h+=`<section class="card"><div class="ch"><div><h2>4 tiêu chí đánh giá dữ liệu chính xác</h2><p class="sub">Trượt 1 tiêu chí là không đạt tháng.</p></div><span class="chip na">KPI thưởng 10% DIP: 4 tiêu chí đều ĐẠT và Tồn kho chuẩn xác 100%</span></div><div class="kpis">${DA.map(c=>tile(c,s,all,false)).join('')}</div></section>`;
+  h+=`<section class="card"><div class="ch"><div><h2>Năng lực giao hàng</h2><p class="sub">Đánh giá năng lực giao hàng, không tính là lỗi.</p></div><span class="chip na">KPI thưởng 5% DIP: On time và 24H đạt tối thiểu 95%</span></div><div class="kpis">${CAP.map(c=>tile(c,s,all,'cap')).join('')}</div></section>`;
   h+=`<section class="card"><div class="ch"><div><h2>Chỉ số theo dõi</h2><p class="sub">Không tính vào kết quả tháng.</p></div></div><div class="kpis">${TRK.map(c=>tile(c,s,all,true)).join('')}</div></section>`;
-  h+=`<section class="card"><div class="ch"><div><h2>Năng lực giao hàng</h2><p class="sub">Đánh giá năng lực giao hàng, không tính là lỗi.</p></div></div><div class="kpis">${CAP.map(c=>tile(c,s,all,'cap')).join('')}</div></section>`;
   if(all){
     const cell=(v,ok)=>`<td class="n ${ok==null?'':(ok==='PASS'?'cok':'cno')}">${v}</td>`;
     const rw=(x,tot)=>cell(pc(x.payload_fail_pct),tot?null:x.v_payload)+cell(pc(x.dt_route_fail_pct),tot?null:x.v_dt)+cell(fmt(x.cd_routes_fail),tot?null:x.v_created)+cell(fmt(x.users_wrong),tot?null:x.v_username);
@@ -450,7 +450,7 @@ function pOverview(){
     const rows=DATA.scorecard.map(x=>`<tr class="click" data-npp="${x.npp}"><th scope="row">${x.npp}</th><td>${chip(x.overall)}</td>${rw(x)}${trk(x)}</tr>`);
     rows.push(`<tr class="tot"><th scope="row">Tổng</th><td></td>${rw(DATA.total,true)}${trk(DATA.total)}</tr>`);
     h+=`<section class="card"><div class="ch"><div><h2>Bảng điểm NPP</h2><p class="sub">Bấm một dòng để xem riêng NPP.</p></div></div>${table([['NPP'],['Kết quả'],['Payload','n'],['D&T','n'],['Created Date','n'],['User sai','n'],['On time','n'],['24H','n'],['Geo','n'],[`Chuyến lỗi`,'n'],['Đơn DSA','n']],rows)}
-      <p class="sub">Payload, D&T: % chuyến lỗi · Created Date: số chuyến lỗi · User sai: số tài khoản. On time, 24H: năng lực giao hàng · Geo, Chuyến lỗi, Đơn DSA: theo dõi.</p></section>`;
+      <p class="sub">Payload, D&T: % chuyến lỗi · Created Date: số chuyến lỗi · User sai: số tài khoản. On time, 24H, Geo: năng lực giao hàng · Chuyến lỗi, Đơn DSA: theo dõi.</p></section>`;
     const fails=DATA.scorecard.filter(x=>x.overall==='FAIL');
     if(fails.length) h+=`<section class="card"><div class="ch"><div><h2>Ưu tiên xử lý</h2><p class="sub">Tiêu chí cần tập trung và phần còn thiếu để đạt.</p></div></div>
       <div class="grid2">${fails.map(x=>`<div style="display:grid;gap:8px"><h3>${x.npp}</h3>${todoList(x)}</div>`).join('')}</div></section>`;
@@ -663,18 +663,18 @@ function pLogic(){
    ['Created Date','0 chuyến','Đơn lỗi khi tạo sau giờ giao (<code>Sent_To_distributor</code> > <code>DeliverDateTime</code>). 1 đơn lỗi là chuyến lỗi.'],
    ['User name','0 tài khoản sai','Tài khoản phải là SĐT 10 số, biển số xe hoặc tài khoản DSA.']];
   const T=[
-   ['Geo Compliance',`≥ ${TH.geo}%`,`Đạt khi lệch ≤ ${TH.geo_radius_m}m, cách outlet trước > ${TH.geo_gap_min} phút, hoàn tất trong ${W}. Không tính DSA.`],
-   [`Chuyến lỗi > ${T_PLAN}%`,`≤ ${T_TOL}% chuyến`,'Gộp lỗi của Payload, D&T, Created Date, User name và Geo.'],
+      [`Chuyến lỗi > ${T_PLAN}%`,`≤ ${T_TOL}% chuyến`,'Gộp lỗi của Payload, D&T, Created Date, User name và Geo.'],
    ['Đơn duyệt bởi DSA','Không có ngưỡng','Tỷ lệ và số đơn có tài khoản giao hàng là tài khoản kho (DSA). Đơn DSA không xét Geo và Distance & Time.']];
   const C=[
    ['On time',`Tham chiếu > ${TH.ontime}%`,'Theo cột <code>is_ontime</code> của TMS. Successful dùng chung kết quả.'],
-   ['On time 24H',`Tham chiếu > ${TH.ontime}%`,`Từ lúc tạo đơn đến lúc giao ≤ ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00, giao hôm sau: tính từ 00:00 hôm sau (thứ 7 → thứ 2). Trừ Chủ nhật nếu không giao Chủ nhật. Giao sau ${TH.wh_end}:00 vẫn đạt nếu trong ${TH.sla_hours} giờ.`]];
+   ['On time 24H',`Tham chiếu > ${TH.ontime}%`,`Từ lúc tạo đơn đến lúc giao ≤ ${TH.sla_hours} giờ. Đơn tạo từ ${TH.send_cutoff}:00, giao hôm sau: tính từ 00:00 hôm sau (thứ 7 → thứ 2). Trừ Chủ nhật nếu không giao Chủ nhật. Giao sau ${TH.wh_end}:00 vẫn đạt nếu trong ${TH.sla_hours} giờ.`],
+   ['Geo Compliance',`≥ ${TH.geo}%`,`Đạt khi lệch ≤ ${TH.geo_radius_m}m, cách outlet trước > ${TH.geo_gap_min} phút, hoàn tất trong ${W}. Không tính DSA.`]];
   let h=`<section class="card"><div><h2>Cách tính kết quả tháng</h2><p class="sub">Theo file chấm Data Accuracy chính thức.</p></div>
     <div class="flow"><div><span class="lbl">Bước 1</span><b>Đơn lỗi</b><span class="sub">Ghi nhận lỗi theo từng tiêu chí.</span></div>
     <div><span class="lbl">Bước 2</span><b>Chuyến lỗi</b><span class="sub">Gộp đơn lỗi theo chuyến (PlanNumber).</span></div>
     <div><span class="lbl">Bước 3</span><b>Kết quả NPP</b><span class="sub">Đạt cả 4 tiêu chí mới đạt tháng, nhận 15% DIP.</span></div></div></section>`;
-  h+=`<section class="card"><h2>4 tiêu chí xét kết quả</h2><div class="rules">${R.map(r=>`<article class="rule"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
-  h+=`<section class="card"><div><h2>Năng lực giao hàng</h2><p class="sub">Đánh giá năng lực giao hàng của NPP. Không tính là lỗi, không ảnh hưởng kết quả tháng.</p></div><div class="rules">${C.map(r=>`<article class="rule trk"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
+  h+=`<section class="card"><h2>4 tiêu chí đánh giá dữ liệu chính xác</h2><p class="sub">KPI thưởng 10% DIP khi 4 tiêu chí đều ĐẠT và Tồn kho chuẩn xác 100%.</p><div class="rules">${R.map(r=>`<article class="rule"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
+  h+=`<section class="card"><div><h2>Năng lực giao hàng</h2><p class="sub">Đánh giá năng lực giao hàng của NPP. Không tính là lỗi, không ảnh hưởng kết quả tháng. KPI thưởng 5% DIP khi On time và 24H đạt tối thiểu 95%.</p></div><div class="rules">${C.map(r=>`<article class="rule trk"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
   h+=`<section class="card"><div><h2>Chỉ số theo dõi</h2><p class="sub">Giúp NPP cải thiện, không tính vào kết quả.</p></div><div class="rules">${T.map(r=>`<article class="rule trk"><div class="rh"><h3>${r[0]}</h3><span class="rt">${r[1]}</span></div><p>${r[2]}</p></article>`).join('')}</div></section>`;
   h+=`<section class="card"><h2>Lưu ý</h2><div class="rules">
     <article class="rule"><h3>Mức cho phép</h3><p>Số chuyến lỗi tối đa vẫn đạt = số lớn nhất còn dưới ${T_DT}% tổng chuyến. Ví dụ 400 chuyến: tối đa 19.</p></article>
@@ -692,7 +692,7 @@ const MC=[  // tiêu chí: khoá verdict, cách hiện giá trị, true = càng 
  {k:'dt',n:'Distance & Time',v:'v_dt',val:x=>x.dt_route_fail_pct,f:v=>pc(v),low:1},
  {k:'created',n:'Created Date',v:'v_created',val:x=>x.cd_routes_fail,f:v=>fmt(v)+' chuyến',low:1},
  {k:'username',n:'User name',v:'v_username',val:x=>x.users_wrong,f:v=>fmt(v)+' TK',low:1},
- {k:'geo',n:'Geo Compliance',v:'v_geo',val:x=>x.geo_pct,f:v=>pc(v,1),trk:1},
+ {k:'geo',n:'Geo Compliance',v:'v_geo',val:x=>x.geo_pct,f:v=>pc(v,1),trk:1,cap:1},
  {k:'ontime',n:'On time',v:'v_ontime',val:x=>x.ot_pct,f:v=>pc(v,1),trk:1,cap:1},
  {k:'h24',n:'On time 24H',v:'v_24',val:x=>x.t24_pct,f:v=>pc(v,1),trk:1,cap:1},
  {k:'dsa',n:'Đơn duyệt bởi DSA',v:'_',val:x=>dsaP(x),f:v=>pc(v,1),trk:1,info:1}];
@@ -719,7 +719,7 @@ function pMonths(){
     const ok=r[c.v]==='PASS';
     if(!c.val) return `<td class="n">${chip(r.overall)}</td>`;
     return `<td class="n ${c.cap?(ok?'':'cwarn'):c.trk?'':(ok?'cok':'cno')}">${c.val?c.f(c.val(r))+' ':''}${c.cap?(ok?'':'!'):c.trk?(ok?'':'!'):(ok?'✓':'✕')}</td>`;};
-  h+=`<section class="card"><div><h2>${all?'Số NPP đạt theo tiêu chí':'Từng tiêu chí qua các tháng'}</h2><p class="sub">4 tiêu chí đầu xét kết quả · Geo, Đơn DSA: theo dõi · On time, 24H: năng lực giao hàng, không tính là lỗi.</p></div>${
+  h+=`<section class="card"><div><h2>${all?'Số NPP đạt theo tiêu chí':'Từng tiêu chí qua các tháng'}</h2><p class="sub">4 tiêu chí đầu đánh giá dữ liệu chính xác · On time, 24H, Geo: năng lực giao hàng, không tính là lỗi · Đơn DSA: theo dõi.</p></div>${
     table(head,MC.map(c=>`<tr><th scope="row" style="${c.trk?'font-weight:500;color:var(--muted)':''}">${c.n}</th>${ms.map(m=>cell(m,c)).join('')}</tr>`))}</section>`;
   /* đạt / rớt từng NPP */
   if(all){

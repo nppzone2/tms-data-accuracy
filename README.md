@@ -44,7 +44,7 @@ Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lị
 
 ## Cách chấm
 
-**Kết quả tháng = đạt cả 4 tiêu chí:**
+**Kết quả tháng = đạt cả 4 tiêu chí đánh giá dữ liệu chính xác:** (KPI thưởng 10% DIP khi 4 tiêu chí đều ĐẠT và Tồn kho chuẩn xác 100%)
 
 | Tiêu chí | Lỗi | NPP đạt khi |
 |---|---|---|
@@ -53,9 +53,9 @@ Lưu ý: nếu repo công khai, file Excel đã tải lên vẫn còn trong lị
 | Created Date | đơn tạo (Fill Rate `Sent_To_distributor`, ghép `DocNo = OrderNumber`) sau giờ giao; 1 đơn lỗi là chuyến lỗi | 0 chuyến lỗi |
 | User name | tài khoản không phải SĐT, biển số xe hoặc DSA | 0 tài khoản sai |
 
-**Năng lực giao hàng (không tính là lỗi, không ảnh hưởng kết quả):** On time `is_ontime` (tham chiếu > 95%), On time 24H (tham chiếu > 95%; chốt 17:00, thứ 7 sau 17:00 sang thứ 2, trừ Chủ nhật nếu không giao Chủ nhật, giao sau 20:00 vẫn đạt nếu trong 24 giờ).
+**Năng lực giao hàng (không tính là lỗi, không ảnh hưởng kết quả; KPI thưởng 5% DIP khi On time và 24H đạt tối thiểu 95%):** On time `is_ontime` (tham chiếu > 95%), On time 24H (tham chiếu > 95%; chốt 17:00, thứ 7 sau 17:00 sang thứ 2, trừ Chủ nhật nếu không giao Chủ nhật, giao sau 20:00 vẫn đạt nếu trong 24 giờ), Geo Compliance (≥ 85%).
 
-**Chỉ số theo dõi (không tính vào kết quả):** Geo Compliance (≥ 85%), Chuyến lỗi > 30% gộp lỗi Payload, D&T, Created Date, User name, Geo (≤ 5% chuyến).
+**Chỉ số theo dõi (không tính vào kết quả):** Chuyến lỗi > 30% gộp lỗi Payload, D&T, Created Date, User name, Geo (≤ 5% chuyến); Đơn duyệt bởi DSA (tỷ lệ và số đơn, không có ngưỡng).
 
 ## Cấu trúc
 
