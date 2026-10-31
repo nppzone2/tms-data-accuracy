@@ -71,6 +71,8 @@ def slice_for(data, n):
              dt_top=keep(data['dt_top']), pl_top=keep(data['pl_top']), cd_list=keep(data['cd_list']),
              plan_list=keep(data['plan_list']), late_list=keep(data.get('late_list', [])))
     d['meta'] = dict(data['meta'], npps=1, fill_gap=[x for x in data['meta'].get('fill_gap', []) if x['npp'] == n])
+    d['geo_list'] = [r for r in data.get('geo_list', []) if r['TenantName'] == n]
+    d['dsa_list'] = [r for r in data.get('dsa_list', []) if r['TenantName'] == n]
     return d
 
 blobs = {'admin': seal(dict(__role='admin', order=ORDER, completed=DONE, current=CUR, months=MONTHS), admin_pw)}

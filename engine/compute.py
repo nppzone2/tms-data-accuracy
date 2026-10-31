@@ -356,6 +356,43 @@ def cell(v):
 E = E.sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
 errors = [[cell(v) for v in row] for row in E[ECOLS].itertuples(index=False)]
 
+# ---------- danh sách đơn Geo / giao sau 20:00 và đơn DSA (trang Chi tiết KPI) ----------
+def geo_reason(r):
+    rs = []
+    if r.g_v: rs.append(f'Sai vị trí: lệch {r.distance_to_dropped:,.0f}m (ngưỡng {TH["geo_radius_m"]}m)')
+    if r.g_w: rs.append(f'Outlet tới outlet {r.gap:.1f} phút (yêu cầu trên {TH["geo_gap_min"]} phút)')
+    if r.g_x:
+        rs.append('Ngoài giờ làm việc: thiếu thời điểm giao' if pd.isna(r.DeliverDateTime)
+                  else f'Ngoài giờ làm việc: hoàn tất {r.DeliverDateTime:%H:%M} (chỉ tính 06:00–20:00)')
+    return rs
+def h24_text(r):
+    if not r.h24_scope: return 'không có giờ tạo, không đo được 24H'
+    if r.h24_dur < 0: return 'tạo sau khi giao'
+    if r.h24_fail: return f'quá 24H ({r.h24_dur:.1f} giờ)'
+    return f'đạt 24H ({r.h24_dur:.1f} giờ)'
+def geo_row(r):
+    labs, rs = [], []
+    if r.f_geo: labs.append('Geo'); rs += geo_reason(r)
+    if r.wh_fail:
+        labs.append(f'Giao sau {TH["wh_end"]}:00')
+        rs.append(f'Giao lúc {r.DeliverDateTime:%H:%M}, 24H: {h24_text(r)}')
+    return ' + '.join(labs), '; '.join(rs)
+def dsa_row(r):
+    loi, ly = why(r)
+    return loi or 'Không lỗi', ly or '—'
+GEO_ROWS = m[m.f_geo | m.wh_fail].sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
+DSA_ROWS = m[m.utype == 'DSA'].sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
+def rows_out(D, fn):
+    out = []
+    for r in D.itertuples():
+        loi, ly = fn(r)
+        out.append(dict(Date=cell(r.Date), TenantName=r.TenantName, PlanNumber=r.PlanNumber, OrderNumber=r.OrderNumber,
+                        OutletCode=cell(r.OutletCode), username=r.username, DriverName=cell(r.DriverName),
+                        DeliverDateTime=cell(r.DeliverDateTime), plan_fail=bool(r.plan_fail), loi=loi, ly_do=ly))
+    return out
+geo_list = rows_out(GEO_ROWS, geo_row)
+dsa_list = rows_out(DSA_ROWS, dsa_row)
+
 # ---------- top chuyến ----------
 dt_top = pl[pl.dt_fail].sort_values('bad', ascending=False).reset_index()
 dt_top = [dict(plan=r.PlanNumber, npp=r.npp, truck=r.truck, user=r.user, orders=int(r.dt_n), bad=int(r.bad),
@@ -416,7 +453,7 @@ DATA = dict(
               days=int(m.Date.dt.normalize().nunique()), excluded=EXCL, fill_gap=fill_gap),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
-    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, dq=dq, sens=sens)
+    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, geo_list=geo_list, dsa_list=dsa_list, dq=dq, sens=sens)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 json.dump(DATA, open(OUT, 'w'), ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o))

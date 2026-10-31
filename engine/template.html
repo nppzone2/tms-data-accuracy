@@ -305,6 +305,7 @@ const T_DT=TH.dt_month_pct*100, T_PL=TH.payload_tol*100;
 
 let role=null, scope='ALL', page='overview', kpiSel='payload';
 let EF={q:'',type:'',day:'',npp:'',pf:false}, epage=1;
+const FL={kg:{q:'',type:'',day:'',npp:'',pf:false},kd:{q:'',type:'',day:'',npp:'',pf:false}}, PG={kg:1,kd:1};   // bộ lọc + trang của hai danh sách trong Chi tiết KPI
 const isAdmin=()=>role==='admin';
 const curS=()=>scope==='ALL'?DATA.total:SC[scope];
 const rowsIn=arr=>scope==='ALL'?arr:arr.filter(r=>(r.npp??r.TenantName)===scope);
@@ -519,6 +520,32 @@ async function snapAct(btn){
     toast(e&&e.message==='lib'?'Chưa tải được thư viện chụp ảnh, hãy tải lại trang.':e&&e.message==='clip'?'Trình duyệt không hỗ trợ copy ảnh, hãy dùng nút Tải ảnh.':e&&e.code==='declined'?'Đã huỷ.':'Không tạo được ảnh, hãy thử lại.');
   }finally{ sec.querySelectorAll('.ib').forEach(b=>b.disabled=false); }
 }
+/* danh sách đơn trong Chi tiết KPI (Geo / giao sau 20:00, đơn DSA): cùng bộ lọc với mục Đơn lỗi */
+const TYPES_G=['Geo','Giao sau 20:00'];
+function subRows(list,F,typed){
+  const q=F.q.trim().toLowerCase();
+  return list.filter(e=>(scope==='ALL'||e.TenantName===scope)&&(!F.npp||e.TenantName===F.npp)&&
+    (!typed||!F.type||e.loi.split(' + ').includes(F.type))&&(!F.pf||e.plan_fail)&&(!F.day||(e.Date||'').startsWith(F.day))&&
+    (!q||[e.OrderNumber,e.PlanNumber,e.username,String(e.OutletCode),e.DriverName].some(v=>String(v??'').toLowerCase().includes(q))));
+}
+function pageList(px,list,typed){
+  const F=FL[px], ps=50, rows=subRows(list,F,typed), pages=Math.max(1,Math.ceil(rows.length/ps)); PG[px]=Math.min(PG[px],pages);
+  const days=DATA.daily.ALL.map(x=>x.day);
+  const cnt=t=>list.filter(e=>(scope==='ALL'||e.TenantName===scope)&&e.loi.split(' + ').includes(t)).length;
+  const sl=rows.slice((PG[px]-1)*ps,PG[px]*ps);
+  let h=`<div class="filters">
+    <div class="field"><label for="${px}q">Tìm kiếm</label><input type="search" id="${px}q" value="${esc(F.q)}" placeholder="Đơn, chuyến, tài khoản, outlet"></div>
+    ${typed?`<div class="field"><label for="${px}t">Loại lỗi</label><select id="${px}t"><option value="">Tất cả</option>${TYPES_G.map(t=>`<option ${F.type===t?'selected':''} value="${t}">${t} (${fmt(cnt(t))})</option>`).join('')}</select></div>`:''}
+    ${scope==='ALL'?`<div class="field"><label for="${px}n">NPP</label><select id="${px}n"><option value="">Tất cả</option>${NPPS.map(n=>`<option ${F.npp===n?'selected':''}>${n}</option>`).join('')}</select></div>`:''}
+    <div class="field"><label for="${px}d">Ngày</label><select id="${px}d"><option value="">Tất cả</option>${days.map(d=>`<option ${F.day===d?'selected':''}>${d}</option>`).join('')}</select></div>
+    <label class="check"><input type="checkbox" id="${px}pf" ${F.pf?'checked':''}> Chỉ chuyến lỗi &gt; ${T_PLAN}%</label>
+    <button class="btn sm" type="button" id="${px}clear">Xoá lọc</button></div>`;
+  h+=`<p class="sub">${fmt(rows.length)} đơn.</p>`;
+  h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Tài khoản'],['Lỗi'],['Giao lúc'],['Chi tiết']],
+    sl.map(e=>`<tr><td>${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}</td><td class="mono">${esc(e.OrderNumber)}<br><span class="sub">Outlet ${esc(e.OutletCode)}</span></td><td class="mono">${esc(e.username)}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${t==='Không lỗi'?'ok':'na'}">${esc(t)}</span>`).join(' ')}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
+  h+=`<div class="pager"><button class="btn sm" type="button" id="${px}prev" ${PG[px]<=1?'disabled':''}>← Trước</button><span>Trang ${PG[px]}/${pages}</span><button class="btn sm" type="button" id="${px}next" ${PG[px]>=pages?'disabled':''}>Sau →</button></div>`;
+  return h;
+}
 function pKpi(){
   const s=curS(), all=scope==='ALL';
   if(!DA.concat(TRK,CAP).some(c=>c.k===kpiSel)) kpiSel='payload';
@@ -554,6 +581,7 @@ function pKpi(){
     const gd=DATA.geo_dist[scope], hr=DATA.hours[scope];
     h+=`<div class="grid2">${secT('Khoảng lệch vị trí','Chỉ nhóm 0–50m đạt.',vbar(gd.map(g=>({l:g.label,v:g.n})),{hl:it=>it.l!=='0–50m'}))}
       ${secT('Giờ hoàn tất',`Cột đỏ: ngoài ${String(TH.work_start).padStart(2,'0')}:00–${TH.work_end}:00.`,vbar(hr.map((v,i)=>({l:i+'h',v})),{hl:it=>{const hh=parseInt(it.l);return hh<TH.work_start||hh>=TH.work_end;}}))}</div>`;
+    h+=secT('Danh sách đơn Geo và giao sau 20:00','Lỗi Geo: sai vị trí, outlet quá gần hoặc ngoài giờ 06:00–20:00. Giao sau 20:00 không phải lỗi Geo, chỉ hiện để theo dõi. Cột Giao lúc và chi tiết cho biết 24H.',pageList('kg',DATA.geo_list||[],true));
   }
   if(k==='ontime'){
     h+=top(all?byNpp(x=>x.ot_pct,{thr:TH.ontime,max:100,neutral:1,bad:x=>x.v_ontime!=='PASS'}):'');
@@ -578,6 +606,7 @@ function pKpi(){
     const us=rowsIn(DATA.users.ALL).filter(u=>u.utype==='DSA').sort((a,b)=>b.orders-a.orders);
     h+=secT('Tài khoản DSA','Bấm một tài khoản để xem các đơn lỗi của tài khoản đó.',
       table([['Tài khoản'],['NPP'],['Đơn','n'],['Chuyến','n'],['Đơn lỗi','n']],us.map(u=>`<tr class="click" data-user="${esc(u.username)}"><td class="mono">${esc(u.username)}</td><td>${esc(u.npp)}</td><td class="n">${fmt(u.orders)}</td><td class="n">${fmt(u.plans)}</td><td class="n">${fmt(u.err)}</td></tr>`)));
+    h+=secT('Danh sách đơn duyệt bởi DSA','Đơn có tài khoản kho (DSA). Cột Lỗi cho biết đơn có lỗi khác hay không.',pageList('kd',DATA.dsa_list||[],false));
   }
   if(k==='plan'){
     h+=top(all?byNpp(x=>x.plan_fail_pct,{thr:T_TOL,bad:x=>x.v_plan==='FAIL'}):'');
@@ -799,6 +828,20 @@ function wire(){
   document.querySelectorAll('[data-month]').forEach(el=>el.addEventListener('click',()=>{loadMonth(el.dataset.month);fillScope();$('#month').value=month;go('overview');}));
   document.querySelectorAll('[data-plan]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.plan});epage=1;go('errors');}));
   document.querySelectorAll('[data-user]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.user});epage=1;go('errors');}));
+  if(page==='kpi'){
+    const bindL=(px,typed)=>{
+      const F=FL[px]; if(!document.getElementById(px+'q')) return; let tmr;
+      $('#'+px+'q').addEventListener('input',e=>{clearTimeout(tmr);tmr=setTimeout(()=>{F.q=e.target.value;PG[px]=1;render();const f=$('#'+px+'q');f.focus();f.setSelectionRange(f.value.length,f.value.length);},300);});
+      if(typed) $('#'+px+'t').addEventListener('change',e=>{F.type=e.target.value;PG[px]=1;render();});
+      $('#'+px+'d').addEventListener('change',e=>{F.day=e.target.value;PG[px]=1;render();});
+      if($('#'+px+'n')) $('#'+px+'n').addEventListener('change',e=>{F.npp=e.target.value;PG[px]=1;render();});
+      $('#'+px+'pf').addEventListener('change',e=>{F.pf=e.target.checked;PG[px]=1;render();});
+      $('#'+px+'clear').addEventListener('click',()=>{Object.assign(F,{q:'',type:'',day:'',npp:'',pf:false});PG[px]=1;render();});
+      $('#'+px+'prev').addEventListener('click',()=>{PG[px]--;render();});
+      $('#'+px+'next').addEventListener('click',()=>{PG[px]++;render();});
+    };
+    bindL('kg',true); bindL('kd',false);
+  }
   document.querySelectorAll('[data-snap]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();snapAct(el);}));
   document.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{EF=reset({day:el.dataset.day});epage=1;go('errors');}));
   if(page==='errors'){
