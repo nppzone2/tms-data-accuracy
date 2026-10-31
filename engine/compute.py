@@ -46,7 +46,7 @@ for x in CFG.get('exclude_dates', []):
 n_file = len(t)
 dup = int(t.OrderNumber.duplicated().sum())
 
-m = t.merge(f[['DocNo', 'Sent_To_distributor', 'DisCode', 'Distributor_Name', 'Area_Name']],
+m = t.merge(f[['DocNo', 'Sent_To_distributor', 'DisCode', 'Distributor_Name', 'Area_Name', 'OutletName']],
             left_on='OrderNumber', right_on='DocNo', how='left')
 assert len(m) == n_file
 
@@ -366,16 +366,15 @@ def geo_reason(r):
                   else f'Ngoài giờ làm việc: hoàn tất {r.DeliverDateTime:%H:%M} (chỉ tính 06:00–20:00)')
     return rs
 def h24_text(r):
-    if not r.h24_scope: return 'không có giờ tạo, không đo được 24H'
-    if r.h24_dur < 0: return 'tạo sau khi giao'
-    if r.h24_fail: return f'quá 24H ({r.h24_dur:.1f} giờ)'
-    return f'đạt 24H ({r.h24_dur:.1f} giờ)'
+    if not r.h24_scope: return 'không đo được (thiếu giờ tạo)'
+    h = f'{r.h24_dur:.1f}'.replace('.', ',')
+    return f'{"không đạt" if r.h24_fail else "đạt"} ({h} giờ)'
 def geo_row(r):
     labs, rs = [], []
     if r.f_geo: labs.append('Geo'); rs += geo_reason(r)
     if r.wh_fail:
         labs.append(f'Giao sau {TH["wh_end"]}:00')
-        rs.append(f'Giao lúc {r.DeliverDateTime:%H:%M}, 24H: {h24_text(r)}')
+        rs.append(f'Giờ hoàn tất: {r.DeliverDateTime:%H:%M}; 24H: {h24_text(r)}')
     return ' + '.join(labs), '; '.join(rs)
 def dsa_row(r):
     loi, ly = why(r)
@@ -387,7 +386,7 @@ def rows_out(D, fn):
     for r in D.itertuples():
         loi, ly = fn(r)
         out.append(dict(Date=cell(r.Date), TenantName=r.TenantName, PlanNumber=r.PlanNumber, OrderNumber=r.OrderNumber,
-                        OutletCode=cell(r.OutletCode), username=r.username, DriverName=cell(r.DriverName),
+                        OutletCode=cell(r.OutletCode), OutletName=cell(r.OutletName), username=r.username, DriverName=cell(r.DriverName),
                         DeliverDateTime=cell(r.DeliverDateTime), plan_fail=bool(r.plan_fail), loi=loi, ly_do=ly))
     return out
 geo_list = rows_out(GEO_ROWS, geo_row)

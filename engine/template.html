@@ -541,8 +541,8 @@ function pageList(px,list,typed){
     <label class="check"><input type="checkbox" id="${px}pf" ${F.pf?'checked':''}> Chỉ chuyến lỗi &gt; ${T_PLAN}%</label>
     <button class="btn sm" type="button" id="${px}clear">Xoá lọc</button></div>`;
   h+=`<p class="sub">${fmt(rows.length)} đơn.</p>`;
-  h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Tài khoản'],['Lỗi'],['Giao lúc'],['Chi tiết']],
-    sl.map(e=>`<tr><td>${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}</td><td class="mono">${esc(e.OrderNumber)}<br><span class="sub">Outlet ${esc(e.OutletCode)}</span></td><td class="mono">${esc(e.username)}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${t==='Không lỗi'?'ok':'na'}">${esc(t)}</span>`).join(' ')}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
+  h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Outlet'],['Tài khoản'],['Lỗi'],['Giao lúc'],['Chi tiết']],
+    sl.map(e=>`<tr><td>${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}</td><td class="mono">${esc(e.OrderNumber)}</td><td>${esc(e.OutletName||'—')}<br><span class="sub mono">${esc(e.OutletCode)}</span></td><td class="mono">${esc(e.username)}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${t==='Không lỗi'?'ok':'na'}">${esc(t)}</span>`).join(' ')}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
   h+=`<div class="pager"><button class="btn sm" type="button" id="${px}prev" ${PG[px]<=1?'disabled':''}>← Trước</button><span>Trang ${PG[px]}/${pages}</span><button class="btn sm" type="button" id="${px}next" ${PG[px]>=pages?'disabled':''}>Sau →</button></div>`;
   return h;
 }
