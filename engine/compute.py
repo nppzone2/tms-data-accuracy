@@ -329,8 +329,8 @@ def late_why(r):
         rs.append('On time: trễ ' + (f'{int(r.late_days)} ngày so với ngày hứa' if pd.notna(r.late_days) and r.late_days > 0 else
                                     ('chưa có giờ giao' if pd.isna(r.DeliverDateTime) else 'theo SLA của TMS')))
     if r.h24_fail:
-        rs.append('24H: tạo sau khi giao' if r.h24_dur < 0 else f'24H: {r.h24_dur:.1f} giờ (quá {TH["sla_hours"]} giờ)')
-    if r.wh_24: rs.append(f'24H: giao sau {TH["wh_end"]}:00 (lúc {r.DeliverDateTime:%H:%M}), không có giờ tạo đơn')
+        rs.append('tạo sau khi giao' if r.h24_dur < 0 else f'{r.h24_dur:.1f} giờ (quá {TH["sla_hours"]} giờ)')
+    if r.wh_24: rs.append(f'giao sau {TH["wh_end"]}:00 (lúc {r.DeliverDateTime:%H:%M}), không có giờ tạo đơn')
     return '; '.join(rs)
 
 LT = m[m.late].sort_values(['TenantName', 'Date', 'PlanNumber', 'seq'])
