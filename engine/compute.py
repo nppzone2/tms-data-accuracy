@@ -361,7 +361,8 @@ def geo_reason(r):
     rs = []
     if r.g_v: rs.append(f'Sai vị trí: lệch {r.distance_to_dropped:,.0f}m (ngưỡng {TH["geo_radius_m"]}m)')
     if r.g_w: rs.append(f'Outlet tới outlet {r.gap:.1f} phút (yêu cầu trên {TH["geo_gap_min"]} phút)')
-    if r.g_x:
+    # giao sau 20:00 đã có ghi chú "Giờ hoàn tất" riêng, không lặp lại lý do ngoài giờ
+    if r.g_x and not r.wh_fail:
         rs.append('Ngoài giờ làm việc: thiếu thời điểm giao' if pd.isna(r.DeliverDateTime)
                   else f'Ngoài giờ làm việc: hoàn tất {r.DeliverDateTime:%H:%M} (chỉ tính 06:00–20:00)')
     return rs
