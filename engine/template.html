@@ -539,7 +539,8 @@ function pageList(px,list,typed){
     ${scope==='ALL'?`<div class="field"><label for="${px}n">NPP</label><select id="${px}n"><option value="">Tất cả</option>${NPPS.map(n=>`<option ${F.npp===n?'selected':''}>${n}</option>`).join('')}</select></div>`:''}
     <div class="field"><label for="${px}d">Ngày</label><select id="${px}d"><option value="">Tất cả</option>${days.map(d=>`<option ${F.day===d?'selected':''}>${d}</option>`).join('')}</select></div>
     <label class="check"><input type="checkbox" id="${px}pf" ${F.pf?'checked':''}> Chỉ chuyến lỗi &gt; ${T_PLAN}%</label>
-    <button class="btn sm" type="button" id="${px}clear">Xoá lọc</button></div>`;
+    <button class="btn sm" type="button" id="${px}clear">Xoá lọc</button>
+    <button class="btn sm" type="button" id="${px}xlsx">Tải Excel</button><button class="btn sm" type="button" id="${px}csv">Tải CSV</button></div>`;
   h+=`<p class="sub">${fmt(rows.length)} đơn.</p>`;
   h+=table([['Ngày'],['NPP'],['Chuyến'],['Đơn'],['Outlet'],['Tài khoản'],['Lỗi'],['Giao lúc'],['Chi tiết']],
     sl.map(e=>`<tr><td>${esc((e.Date||'').slice(0,5))}</td><td>${esc(e.TenantName)}</td><td class="mono">${esc(e.PlanNumber)}</td><td class="mono">${esc(e.OrderNumber)}</td><td>${esc(e.OutletName||'—')}<br><span class="sub mono">${esc(e.OutletCode)}</span></td><td class="mono">${esc(e.username)}</td><td>${e.loi.split(' + ').map(t=>`<span class="chip ${t==='Không lỗi'?'ok':'na'}">${esc(t)}</span>`).join(' ')}</td><td class="mono">${esc((e.DeliverDateTime||'—').slice(0,16))}</td><td class="why">${esc(e.ly_do)}</td></tr>`));
@@ -661,6 +662,31 @@ function pErrors(){
 }
 const XCOLS=[['Date','Ngày'],['TenantName','NPP'],['PlanNumber','Chuyến'],['OrderNumber','Đơn'],['OutletCode','Outlet'],['username','Tài khoản'],['utype','Loại tài khoản'],['DriverName','Tài xế/Xe'],['Status','Trạng thái'],['Sent_To_distributor','Created Date'],['DeliverDateTime','Giao lúc'],['PromisedDate','Ngày hứa'],['distance_to_dropped','Lệch vị trí (m)'],['gap','Cách outlet trước (phút)'],['seq','Thứ tự trong chuyến'],['plan_orders','Số đơn của chuyến'],['plan_err','Đơn lỗi của chuyến'],['plan_err_pct','% đơn lỗi của chuyến'],['plan_fail_txt','Chuyến lỗi >30%'],['plan_ratio','Tỷ lệ tải chuyến'],['TruckCategory','Loại xe'],['TruckCapacityWeight','Tải trọng xe'],['Assigned_Weight','Khối lượng đơn'],['h24_dur','Thời gian SLA 24H (giờ)'],['loi','Loại lỗi'],['ly_do','Chi tiết']];
 const xv=(r,k)=>k==='plan_err_pct'?Math.round(r.plan_err_ratio*1000)/10:k==='plan_fail_txt'?(r.plan_fail?'Có':'Không'):r[k];
+/* xuất danh sách Chi tiết KPI: đúng bộ lọc và cột đang hiển thị trên web */
+const LCOLS=[['Ngày',r=>(r.Date||'').slice(0,10)],['NPP',r=>r.TenantName],['Chuyến',r=>r.PlanNumber],['Đơn',r=>r.OrderNumber],
+  ['Outlet',r=>r.OutletName||''],['Mã outlet',r=>r.OutletCode],['Tài khoản',r=>r.username],['Tài xế/Xe',r=>r.DriverName],
+  ['Lỗi',r=>r.loi],['Giao lúc',r=>r.DeliverDateTime],['Chuyến lỗi >30%',r=>r.plan_fail?'Có':'Không'],['Chi tiết',r=>r.ly_do]];
+async function saveList(kind,px,list,typed,label){
+  const rows=subRows(list,FL[px],typed);
+  const name=`TMS_${label}_${scope==='ALL'?'tat_ca':scope}_${month}.${kind}`;
+  let data;
+  if(kind==='csv'){
+    const q=v=>{const s=String(v??'');return /[",\n;]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+    data='\ufeff'+[LCOLS.map(c=>c[0]).join(','),...rows.map(r=>LCOLS.map(c=>q(c[1](r))).join(','))].join('\n');
+  } else {
+    if(!window.XLSX){toast('Chưa tải được thư viện Excel, hãy dùng CSV.');return;}
+    const ws=XLSX.utils.aoa_to_sheet([LCOLS.map(c=>c[0]),...rows.map(r=>LCOLS.map(c=>c[1](r)??''))]);
+    ws['!cols']=LCOLS.map(c=>({wch:Math.max(10,c[0].length+2)}));
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Chi tiet');
+    data=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
+  }
+  const dl=window.claude&&window.claude.use&&await window.claude.use('downloads');
+  if(!dl){const blob=new Blob([data],{type:kind==='csv'?'text/csv;charset=utf-8':'application/octet-stream'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);toast('Đã tải '+fmt(rows.length)+' dòng');return;}
+  try{await dl.save({filename:name,data});toast('Đã tải '+fmt(rows.length)+' dòng');}
+  catch(e){if(e&&e.code!=='declined') toast('Không tải được file ('+(e.code||'lỗi')+').');}
+}
 async function saveFile(kind){
   const rows=filtered();
   const name=`TMS_don_loi_${scope==='ALL'?(EF.npp||'tat_ca'):scope}${EF.type?'_'+EF.type.replace(/\W+/g,''):''}${EF.day?'_'+EF.day.replace('/','-'):''}.${kind}`;
@@ -839,6 +865,8 @@ function wire(){
       $('#'+px+'clear').addEventListener('click',()=>{Object.assign(F,{q:'',type:'',day:'',npp:'',pf:false});PG[px]=1;render();});
       $('#'+px+'prev').addEventListener('click',()=>{PG[px]--;render();});
       $('#'+px+'next').addEventListener('click',()=>{PG[px]++;render();});
+      $('#'+px+'xlsx').addEventListener('click',()=>saveList('xlsx',px,px==='kg'?(DATA.geo_list||[]):(DATA.dsa_list||[]),typed,px==='kg'?'Geo_giao20h':'Don_DSA'));
+      $('#'+px+'csv').addEventListener('click',()=>saveList('csv',px,px==='kg'?(DATA.geo_list||[]):(DATA.dsa_list||[]),typed,px==='kg'?'Geo_giao20h':'Don_DSA'));
     };
     bindL('kg',true); bindL('kd',false);
   }
