@@ -4,5 +4,5 @@
     {"from": "2026-09-16", "to": "2026-09-23", "note": "Lỗi hệ thống do update Portal 4X"},
     {"from": "2026-10-12", "to": "2026-10-13", "note": "Lỗi đăng nhập TMS & Driver App"}
   ],
-  "completed_months_shown": 3
+  "completed_months_shown": 11
 }
