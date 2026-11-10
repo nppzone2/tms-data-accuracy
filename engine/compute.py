@@ -424,10 +424,13 @@ user_plans = [dict(npp=r.npp, plan=r.PlanNumber, date=r.date.strftime('%d/%m/%Y'
 def order_base(r):
     return dict(npp=r.TenantName, date=r.Date.strftime('%d/%m/%Y'), plan=r.PlanNumber, order=r.OrderNumber,
                 outlet_code=nn(r.OutletCode), outlet_name=nn(r.OutletName), user=nn(r.username), truck=nn(r.DriverName))
+# toàn bộ đơn của tháng, kèm kết quả từng đơn: Lỗi / Không lỗi / Không xét (ngoài phạm vi tiêu chí)
 dt_orders = [dict(order_base(r), delivered=fmt_dt(r.DeliverDateTime), gap_min=nn(round(r.time_outlet_outlet, 1)),
-                  dist_m=nn(round(r.dist_oo))) for r in m[m.f_dt].sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
+                  dist_m=None if pd.isna(r.dist_oo) else int(round(r.dist_oo)), result='Lỗi' if r.f_dt else ('Không lỗi' if r.dt_scope else 'Không xét (DSA)'))
+             for r in m.sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
 cd_orders = [dict(order_base(r), created=fmt_dt(r.Sent_To_distributor), delivered=fmt_dt(r.DeliverDateTime),
-                  hours=nn(round(-r.cd_gap_h, 1))) for r in m[m.f_cd].sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
+                  hours=nn(round(-r.cd_gap_h, 1)), result='Lỗi' if r.f_cd else ('Không lỗi' if r.cd_scope else 'Không xét'))
+             for r in m.sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
 
 # ---------- chất lượng dữ liệu ----------
 fr_only = sorted(set(f.DocNo) - set(t.OrderNumber))
