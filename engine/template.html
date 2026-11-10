@@ -135,6 +135,7 @@ footer{color:var(--muted);font-size:.78rem;padding-block:0 32px}
 .ib:disabled{opacity:.5;cursor:wait}
 .ib svg{width:16px;height:16px}
 .snapcap{font-size:.75rem;color:var(--muted);font-weight:600}
+.xbar{display:flex;justify-content:flex-end;margin:-4px 0 10px}
 table{border-collapse:collapse;width:100%;font-size:.84rem}
 th,td{padding:8px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
 thead th{background:var(--sunk);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;white-space:nowrap}
@@ -553,7 +554,8 @@ function pKpi(){
   const btn=(c,track)=>`<button type="button" data-ks="${c.k}" class="${c.k===kpiSel?'on':''}" aria-pressed="${c.k===kpiSel}">${track?'':`<i style="background:${c.ok(s)==='PASS'?'var(--good)':'var(--crit)'}"></i>`}${c.n}</button>`;
   let h=`<div class="segs"><div class="seg"><span class="lbl">Xét KQ</span>${DA.map(c=>btn(c,false)).join('')}</div><div class="seg"><span class="lbl">Giao hàng</span>${CAP.map(c=>btn(c,true)).join('')}</div><div class="seg"><span class="lbl">Theo dõi</span>${TRK.map(c=>btn(c,true)).join('')}</div></div>`;
   const k=kpiSel, da=DA.find(c=>c.k===k), cap=CAP.find(x=>x.k===k), c=da||cap||TRK.find(x=>x.k===k), track=!da;
-  const top=extra=>`<section class="card">${cap?headCap(c,s):head(c,s,track)}${extra||''}</section>`;
+  const xbar=da&&XSPEC[k]?`<div class="xbar"><button type="button" class="btn sm" data-xk="${k}">Tải Excel chi tiết</button></div>`:'';
+  const top=extra=>`<section class="card">${cap?headCap(c,s):head(c,s,track)}${xbar}${extra||''}</section>`;
   const plRow=r=>`<tr class="click" data-plan="${esc(r.plan)}"><td class="mono">${esc(r.plan)}</td><td>${esc(r.npp)}</td><td>${esc(r.date)}</td>`;
   if(k==='payload'){
     h+=top(all?byNpp(x=>x.payload_fail_pct,{thr:T_PL,max:capMax(x=>x.payload_fail_pct,T_PL),bad:x=>x.v_payload==='FAIL'}):'');
@@ -662,6 +664,28 @@ function pErrors(){
 }
 const XCOLS=[['Date','Ngày'],['TenantName','NPP'],['PlanNumber','Chuyến'],['OrderNumber','Đơn'],['OutletCode','Outlet'],['username','Tài khoản'],['utype','Loại tài khoản'],['DriverName','Tài xế/Xe'],['Status','Trạng thái'],['Sent_To_distributor','Created Date'],['DeliverDateTime','Giao lúc'],['PromisedDate','Ngày hứa'],['distance_to_dropped','Lệch vị trí (m)'],['gap','Cách outlet trước (phút)'],['seq','Thứ tự trong chuyến'],['plan_orders','Số đơn của chuyến'],['plan_err','Đơn lỗi của chuyến'],['plan_err_pct','% đơn lỗi của chuyến'],['plan_fail_txt','Chuyến lỗi >30%'],['plan_ratio','Tỷ lệ tải chuyến'],['TruckCategory','Loại xe'],['TruckCapacityWeight','Tải trọng xe'],['Assigned_Weight','Khối lượng đơn'],['h24_dur','Thời gian SLA 24H (giờ)'],['loi','Loại lỗi'],['ly_do','Chi tiết']];
 const xv=(r,k)=>k==='plan_err_pct'?Math.round(r.plan_err_ratio*1000)/10:k==='plan_fail_txt'?(r.plan_fail?'Có':'Không'):r[k];
+/* xuất Excel chi tiết theo từng tiêu chí Xét KQ (theo NPP đang xem, hoặc tất cả) */
+const XSPEC={
+  payload:{name:'Payload_tong_PL',list:()=>DATA.pay_all||[],cols:[['NPP',r=>r.npp],['Chuyến',r=>r.plan],['Ngày',r=>r.date],['Xe',r=>r.truck],['Tài khoản',r=>r.user],['Số đơn',r=>r.orders],['Tải trọng (t)',r=>r.weight],['Sức chứa (t)',r=>r.cap],['Tỷ lệ',r=>r.ratio],['Quá tải',r=>r.over]]},
+  username:{name:'UserName_tong_PL',list:()=>DATA.user_plans||[],cols:[['NPP',r=>r.npp],['Chuyến',r=>r.plan],['Ngày',r=>r.date],['Tài khoản',r=>r.user],['Số đơn',r=>r.orders],['Số đơn sai tài khoản',r=>r.wrong],['Kết quả',r=>r.result]]},
+  created:{name:'Created_Date_chi_tiet_don',list:()=>DATA.cd_orders||[],cols:[['NPP',r=>r.npp],['Ngày',r=>r.date],['Chuyến',r=>r.plan],['Đơn',r=>r.order],['Outlet',r=>r.outlet_name],['Mã outlet',r=>r.outlet_code],['Tài khoản',r=>r.user],['Tài xế/Xe',r=>r.truck],['Tạo lúc',r=>r.created],['Giao lúc',r=>r.delivered],['Chênh lệch (giờ)',r=>r.hours]]},
+  dt:{name:'Distance_Time_chi_tiet_don',list:()=>DATA.dt_orders||[],cols:[['NPP',r=>r.npp],['Ngày',r=>r.date],['Chuyến',r=>r.plan],['Đơn',r=>r.order],['Outlet',r=>r.outlet_name],['Mã outlet',r=>r.outlet_code],['Tài khoản',r=>r.user],['Tài xế/Xe',r=>r.truck],['Giao lúc',r=>r.delivered],['Thời gian outlet tới outlet (phút)',r=>r.gap_min],['Khoảng cách (m)',r=>r.dist_m]]}
+};
+async function saveCrit(k){
+  const sp=XSPEC[k], rows=sp.list().filter(r=>scope==='ALL'||r.npp===scope);
+  const name=`TMS_${sp.name}_${scope==='ALL'?'tat_ca':scope}_${month}.xlsx`;
+  if(!window.XLSX){toast('Chưa tải được thư viện Excel, hãy tải lại trang.');return;}
+  const ws=XLSX.utils.aoa_to_sheet([sp.cols.map(c=>c[0]),...rows.map(r=>sp.cols.map(c=>c[1](r)??''))]);
+  ws['!cols']=sp.cols.map(c=>({wch:Math.max(10,c[0].length+2)}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Chi tiet');
+  const data=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
+  const dl=window.claude&&window.claude.use&&await window.claude.use('downloads');
+  if(!dl){const blob=new Blob([data],{type:'application/octet-stream'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);toast('Đã tải '+fmt(rows.length)+' dòng');return;}
+  try{await dl.save({filename:name,data});toast('Đã tải '+fmt(rows.length)+' dòng');}
+  catch(e){if(e&&e.code!=='declined') toast('Không tải được file ('+(e.code||'lỗi')+').');}
+}
 /* xuất danh sách Chi tiết KPI: đúng bộ lọc và cột đang hiển thị trên web */
 const LCOLS=[['Ngày',r=>(r.Date||'').slice(0,10)],['NPP',r=>r.TenantName],['Chuyến',r=>r.PlanNumber],['Đơn',r=>r.OrderNumber],
   ['Outlet',r=>r.OutletName||''],['Mã outlet',r=>r.OutletCode],['Tài khoản',r=>r.username],['Tài xế/Xe',r=>r.DriverName],
@@ -854,6 +878,7 @@ function wire(){
   document.querySelectorAll('[data-month]').forEach(el=>el.addEventListener('click',()=>{loadMonth(el.dataset.month);fillScope();$('#month').value=month;go('overview');}));
   document.querySelectorAll('[data-plan]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.plan});epage=1;go('errors');}));
   document.querySelectorAll('[data-user]').forEach(el=>el.addEventListener('click',()=>{EF=reset({q:el.dataset.user});epage=1;go('errors');}));
+  document.querySelectorAll('[data-xk]').forEach(el=>el.addEventListener('click',()=>saveCrit(el.dataset.xk)));
   if(page==='kpi'){
     const bindL=(px,typed)=>{
       const F=FL[px]; if(!document.getElementById(px+'q')) return; let tmr;

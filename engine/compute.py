@@ -409,6 +409,26 @@ cd_list = [dict(npp=r.TenantName, order=r.OrderNumber, user=r.username, plan=r.P
                 created=fmt_dt(r.Sent_To_distributor), delivered=fmt_dt(r.DeliverDateTime),
                 hours=round(-r.cd_gap_h, 1)) for r in cd_rows.itertuples()]
 
+# ---------- dữ liệu xuất Excel theo từng tiêu chí Xét KQ ----------
+def nn(x):
+    if x is None or pd.isna(x): return None
+    if isinstance(x, float) and not np.isfinite(x): return None
+    return x
+pl_all = pl.reset_index()
+pl_all['wrong'] = pl_all.PlanNumber.map(m.groupby('PlanNumber').f_user.sum()).fillna(0).astype(int)
+pay_all = [dict(npp=r.npp, plan=r.PlanNumber, date=r.date.strftime('%d/%m/%Y'), truck=nn(r.truck), user=nn(r.user),
+                orders=int(r.orders), weight=nn(round(r.w, 2)), cap=nn(r.cap), ratio=nn(round(r.ratio, 2)),
+                over='Có' if r.pl_fail else 'Không') for r in pl_all.sort_values(['npp', 'PlanNumber']).itertuples()]
+user_plans = [dict(npp=r.npp, plan=r.PlanNumber, date=r.date.strftime('%d/%m/%Y'), user=nn(r.user), orders=int(r.orders),
+                   wrong=int(r.wrong), result='Sai tài khoản' if r.wrong > 0 else 'Đúng') for r in pl_all.sort_values(['npp', 'PlanNumber']).itertuples()]
+def order_base(r):
+    return dict(npp=r.TenantName, date=r.Date.strftime('%d/%m/%Y'), plan=r.PlanNumber, order=r.OrderNumber,
+                outlet_code=nn(r.OutletCode), outlet_name=nn(r.OutletName), user=nn(r.username), truck=nn(r.DriverName))
+dt_orders = [dict(order_base(r), delivered=fmt_dt(r.DeliverDateTime), gap_min=nn(round(r.time_outlet_outlet, 1)),
+                  dist_m=nn(round(r.dist_oo))) for r in m[m.f_dt].sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
+cd_orders = [dict(order_base(r), created=fmt_dt(r.Sent_To_distributor), delivered=fmt_dt(r.DeliverDateTime),
+                  hours=nn(round(-r.cd_gap_h, 1))) for r in m[m.f_cd].sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
+
 # ---------- chất lượng dữ liệu ----------
 fr_only = sorted(set(f.DocNo) - set(t.OrderNumber))
 tms_only = m[m.Sent_To_distributor.isna()]
@@ -453,7 +473,7 @@ DATA = dict(
               days=int(m.Date.dt.normalize().nunique()), excluded=EXCL, fill_gap=fill_gap),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
-    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, geo_list=geo_list, dsa_list=dsa_list, dq=dq, sens=sens)
+    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, geo_list=geo_list, dsa_list=dsa_list, pay_all=pay_all, user_plans=user_plans, dt_orders=dt_orders, cd_orders=cd_orders, dq=dq, sens=sens)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 json.dump(DATA, open(OUT, 'w'), ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o))
