@@ -432,6 +432,17 @@ cd_orders = [dict(order_base(r), created=fmt_dt(r.Sent_To_distributor), delivere
                   hours=nn(round(-r.cd_gap_h, 1)), result='Lỗi' if r.f_cd else ('Không lỗi' if r.cd_scope else 'Không xét'))
              for r in m.sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
 
+# tải toàn bộ đơn: mỗi đơn một dòng, kèm kết quả của từng tiêu chí (Lỗi / Không lỗi / Không xét)
+def _res(err, scope=True):
+    return 'Lỗi' if err else ('Không lỗi' if scope else 'Không xét (DSA)')
+all_orders = [dict(order_base(r), utype=r.utype, delivered=fmt_dt(r.DeliverDateTime), created=fmt_dt(r.Sent_To_distributor),
+                   plan_ratio=nn(round(r.plan_ratio * 100, 1)) if pd.notna(r.plan_ratio) else None,
+                   payload=_res(r.f_pl), username=_res(r.f_user), geo=_res(r.f_geo, r.geo_scope), dt=_res(r.f_dt, r.dt_scope),
+                   created_date=_res(r.f_cd, r.cd_scope), ontime='Đạt' if r.is_ontime == 1 else 'Không đạt',
+                   h24=('Không xét' if not r.h24_scope else ('Không đạt' if r.h24_fail else 'Đạt')),
+                   h24_hours=nn(round(r.h24_dur, 1)), any_err='Có' if r.any_err else 'Không')
+              for r in m.sort_values(['TenantName', 'Date', 'PlanNumber']).itertuples()]
+
 # ---------- chất lượng dữ liệu ----------
 fr_only = sorted(set(f.DocNo) - set(t.OrderNumber))
 tms_only = m[m.Sent_To_distributor.isna()]
@@ -476,7 +487,7 @@ DATA = dict(
               days=int(m.Date.dt.normalize().nunique()), excluded=EXCL, fill_gap=fill_gap),
     thresholds=TH, npps=NPPS, npp_info=npp_info, auth=auth, scorecard=scorecard, total=total,
     err_keys=ECOLS, errors=errors, daily=daily_d, geo_dist=geo_dist, hours=hours_d, users=users_d,
-    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, geo_list=geo_list, dsa_list=dsa_list, pay_all=pay_all, user_plans=user_plans, dt_orders=dt_orders, cd_orders=cd_orders, dq=dq, sens=sens)
+    dt_top=dt_top, pl_top=pl_top, plan_list=plan_list, late_list=late_list, cd_list=cd_list, geo_list=geo_list, dsa_list=dsa_list, pay_all=pay_all, user_plans=user_plans, dt_orders=dt_orders, cd_orders=cd_orders, all_orders=all_orders, dq=dq, sens=sens)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 json.dump(DATA, open(OUT, 'w'), ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o))
